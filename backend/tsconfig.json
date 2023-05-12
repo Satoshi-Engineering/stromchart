@@ -1,0 +1,23 @@
+{
+  "ts-node": {
+    "files": true
+  },
+  "include": [
+    "./index.ts",
+    "./cli.ts",
+    "./src/**/*.ts",
+    "./src/**/*.json"
+  ],
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./build",
+    "esModuleInterop": true,
+    "strict": true,
+    "resolveJsonModule": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ]
+  }
+}
