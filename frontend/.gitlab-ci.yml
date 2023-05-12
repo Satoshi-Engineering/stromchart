@@ -4,8 +4,8 @@
 # - FRONTEND_DEPLOY_SERVER_DEVELOP
 # - FRONTEND_DEPLOY_PATH_MAIN
 # - FRONTEND_DEPLOY_PATH_DEVELOP
-# - TEST_ORIGIN_MAIN
-# - TEST_ORIGIN_DEVELOP
+# - FRONTEND_TEST_ORIGIN_MAIN
+# - FRONTEND_TEST_ORIGIN_DEVELOP
 # - FRONTEND_ENV_FILE_MAIN
 # - FRONTEND_ENV_FILE_DEVELOP
 
@@ -187,11 +187,11 @@ frontend-test-integration:
       if [ "$CI_COMMIT_BRANCH" == "main" ]
       then 
         echo "Running on Main Branch"
-        echo "TEST_ORIGIN=$TEST_ORIGIN_MAIN" > .env.test.local
+        echo "TEST_ORIGIN=$FRONTEND_TEST_ORIGIN_MAIN" > .env.test.local
       elif [ "$CI_COMMIT_BRANCH" == "develop" ]
       then
         echo "Running on develop Branch"
-        echo "TEST_ORIGIN=$TEST_ORIGIN_DEVELOP" > .env.test.local
+        echo "TEST_ORIGIN=$FRONTEND_TEST_ORIGIN_DEVELOP" > .env.test.local
       else
         echo "ERROR: this branch $CI_COMMIT_BRANCH is not allowed to run this job! Wake up your devops team!"
         exit 1

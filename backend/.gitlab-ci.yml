@@ -4,10 +4,10 @@
 # - BACKEND_DEPLOY_SERVER_DEVELOP
 # - BACKEND_DEPLOY_PATH_MAIN
 # - BACKEND_DEPLOY_PATH_DEVELOP
-# - PM2_APP_NAME_MAIN # used to identifiy in ecosystem.config.js
-# - PM2_APP_NAME_DEVELOP # used to identifiy in ecosystem.config.js
-# - ENV_FILE_MAIN
-# - ENV_FILE_DEVELOP
+# - BACKEND_PM2_APP_NAME_MAIN # used to identifiy in ecosystem.config.js
+# - BACKEND_PM2_APP_NAME_DEVELOP # used to identifiy in ecosystem.config.js
+# - BACKEND_ENV_FILE_MAIN
+# - BACKEND_ENV_FILE_DEVELOP
 
 # ------------- BASE CONFIG OF THE JOBS
 # Create Artifact with current ref or tag name (using the slug)
@@ -30,8 +30,8 @@ backend-setup-env:
     policy: pull-push # Upload the cache after it's done
   script:
     # get the .env variables for the environment
-    - if [ "$CI_COMMIT_BRANCH" == "main" ]; then export ENV_FILE=$ENV_FILE_MAIN; fi
-    - if [ "$CI_COMMIT_BRANCH" == "develop" ]; then export ENV_FILE=$ENV_FILE_DEVELOP; fi
+    - if [ "$CI_COMMIT_BRANCH" == "main" ]; then export ENV_FILE=$BACKEND_ENV_FILE_MAIN; fi
+    - if [ "$CI_COMMIT_BRANCH" == "develop" ]; then export ENV_FILE=$BACKEND_ENV_FILE_DEVELOP; fi
     - cd backend
     - |
       # Check if env file exists
@@ -116,13 +116,13 @@ backend-build:
         echo "Deploying on Environment Main"
         export DEPLOY_SERVER=$BACKEND_DEPLOY_SERVER_MAIN
         export DEPLOY_PATH=$BACKEND_DEPLOY_PATH_MAIN
-        export PM2_APP_NAME=$PM2_APP_NAME_MAIN
+        export PM2_APP_NAME=$BACKEND_PM2_APP_NAME_MAIN
       elif [ "$CI_COMMIT_BRANCH" == "develop" ]
       then
         echo "Deploying on Environment Develop"
         export DEPLOY_SERVER=$BACKEND_DEPLOY_SERVER_DEVELOP
         export DEPLOY_PATH=$BACKEND_DEPLOY_PATH_DEVELOP
-        export PM2_APP_NAME=$PM2_APP_NAME_DEVELOP
+        export PM2_APP_NAME=$BACKEND_PM2_APP_NAME_DEVELOP
       else
         echo "ERROR: this branch $CI_COMMIT_BRANCH is not allowed to run this job! Wake up your devops team!"
         exit 1
@@ -211,11 +211,11 @@ backend-test-integration:
       if [ "$CI_COMMIT_BRANCH" == "main" ]
       then 
         echo "Running on Main Branch"
-        export ENV_FILE=$ENV_FILE_MAIN
+        export ENV_FILE=$BACKEND_ENV_FILE_MAIN
       elif [ "$CI_COMMIT_BRANCH" == "develop" ]
       then
         echo "Running on develop Branch"
-        export ENV_FILE=$ENV_FILE_DEVELOP
+        export ENV_FILE=$BACKEND_ENV_FILE_DEVELOP
       else
         echo "ERROR: this branch $CI_COMMIT_BRANCH is not allowed to run this job! Wake up your devops team!"
         exit 1
@@ -227,7 +227,7 @@ backend-test-integration:
       if [ -f "$ENV_FILE" ]; then
         cp $ENV_FILE .env
       else
-        echo -e "\e[31mERROR:ENV_FILE_[ENVIRONMENT/BRANCH] not set in Gitlab CI/CD variables\e[0m"
+        echo -e "\e[31mERROR:BACKEND_ENV_FILE_[ENVIRONMENT/BRANCH] not set in Gitlab CI/CD variables\e[0m"
         exit 1
       fi
     - echo "Running Intergration Test on branch $CI_COMMIT_BRANCH with url $TEST_ORIGIN"
