@@ -1,5 +1,9 @@
 import fees from '@/fees.json'
 
+/**
+ * FeeValues.validUntil has to be a unix timestamp
+ * FeeValues.amount[x].validUntil is the amount of seconds passed on the given day in localized time.
+ */
 type FeeValues = {
   validUntil: number | null
   amount: number | {
