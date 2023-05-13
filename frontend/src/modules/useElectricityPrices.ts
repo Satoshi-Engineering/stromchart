@@ -24,7 +24,7 @@ export default function useElectricityPrices() {
     if (usedPrice == null) {
       return 0
     }
-    return Math.floor(usedPrice.marketprice * 1000)
+    return Math.floor(usedPrice.marketprice * 1000 * 1.03)
   }
 
   return { prices, priceForDate }
