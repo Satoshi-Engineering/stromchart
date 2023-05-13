@@ -10,9 +10,9 @@
       :height="height + margins.top + margins.bottom"
     >
       <g :transform="`translate(${margins.left}, ${margins.top})`">
-        <g ref="yAxis" />
+        <g v-axis-left />
         <g
-          ref="xAxis"
+          v-axis-bottom
           :transform="`translate(0, ${height})`"
         />
         <g>
@@ -41,18 +41,21 @@ import { axisBottom, axisLeft } from 'd3-axis'
 import { select } from 'd3-selection'
 import { stack } from 'd3-shape'
 import { scaleBand, scaleLinear } from 'd3-scale'
-import { onMounted, ref } from 'vue'
+import { computed } from 'vue'
 
 import HeadlineDefault from '@/components/typography/HeadlineDefault.vue'
 import useElectricityFees from '@/modules/useElectricityFees'
+import useElectricityPrices from '@/modules/useElectricityPrices'
 
 const { feeForDate } = useElectricityFees()
+const { priceForDate } = useElectricityPrices()
 
 const colors = ['#B9D8C2', '#9AC2C9', '#8AA1B1', '#4A5043', '#FFCB47', '#9A998C']
 const margins = { top: 100, right: 100, bottom: 50, left: 100 }
 const width = document.body.clientWidth - margins.left - margins.right
 const height = document.body.clientHeight - 70 - margins.top - margins.bottom
-const data = [...new Array(24).keys()].map((value) => {
+
+const data = computed(() => [...new Array(24).keys()].map((value) => {
   const usedDate = new Date()
   usedDate.setHours(value)
   const values = {
@@ -60,7 +63,7 @@ const data = [...new Array(24).keys()].map((value) => {
     electricityFee: feeForDate('electricityFee', usedDate),
     gridFee: feeForDate('gridFee', usedDate),
     gridLoss: feeForDate('gridLoss', usedDate),
-    power: Math.floor(Math.random() * 40000),
+    power: priceForDate(usedDate),
   }
   const salesTax = Math.floor(Object.values(values).reduce((total, current) => total + current, 0) * 0.2)
   const valuesInCents = Object.entries({ ...values, salesTax }).reduce((accumulator, [key, value]) => ({
@@ -72,10 +75,10 @@ const data = [...new Array(24).keys()].map((value) => {
     group: `${String(value).padStart(2, '0')}:00`,
     ...valuesInCents,
   }
-})
-const subgroups = Object.keys(data[0]).filter((subgroup) => subgroup !== 'group')
-const groups = data.map((point) => point.group)
-const maxY = data
+}))
+const subgroups = computed(() => Object.keys(data.value[0]).filter((subgroup) => subgroup !== 'group'))
+const groups = computed(() => data.value.map((point) => point.group))
+const maxY = computed(() => data.value
   .map((values) => Object.values(values).reduce((total, value) => {
     if (typeof value === 'number') {
       return total + value
@@ -87,27 +90,26 @@ const maxY = data
       return value
     }
     return max
-  }, 0)
+  }, 0))
 
-const x = scaleBand()
-  .domain(groups)
+const x = computed(() => scaleBand()
+  .domain(groups.value)
   .range([0, width])
-  .padding(0.2)
-const y = scaleLinear()
-  .domain([0, Math.max(35, maxY * 1.2)])
-  .range([height, 0])
+  .padding(0.2))
+const y = computed(() => scaleLinear()
+  .domain([0, Math.max(35, maxY.value * 1.2)])
+  .range([height, 0]))
 
-const xAxis = ref<HTMLElement | null>(null)
-const yAxis = ref<HTMLElement | null>(null)
-onMounted(() => {
-  if (xAxis.value == null || yAxis.value == null) {
-    return
-  }
-  select(xAxis.value).call(axisBottom(x).tickSizeOuter(0) as any)
-  select(yAxis.value).call(axisLeft(y) as any)
-})
+const vAxisBottom = {
+  mounted: (el: HTMLElement) => {
+    select(el).call(axisBottom(x.value).tickSizeOuter(0) as any)
+  },
+}
+const vAxisLeft = {
+  mounted: (el: HTMLElement) => {
+    select(el).call(axisLeft(y.value) as any)
+  },
+}
 
-const stackedData = stack()
-  .keys(subgroups)(data as any)
-
+const stackedData = computed(() => stack().keys(subgroups.value)(data.value as any))
 </script>
