@@ -44,17 +44,22 @@ import { scaleBand, scaleLinear } from 'd3-scale'
 import { onMounted, ref } from 'vue'
 
 import HeadlineDefault from '@/components/typography/HeadlineDefault.vue'
+import useElectricityFees from '@/modules/useElectricityFees'
+
+const { feeForDate } = useElectricityFees()
 
 const colors = ['#B9D8C2', '#9AC2C9', '#8AA1B1', '#4A5043', '#FFCB47', '#9A998C']
 const margins = { top: 100, right: 100, bottom: 50, left: 100 }
 const width = document.body.clientWidth - margins.left - margins.right
 const height = document.body.clientHeight - 70 - margins.top - margins.bottom
 const data = [...new Array(24).keys()].map((value) => {
+  const usedDate = new Date()
+  usedDate.setHours(value)
   const values = {
-    infrastructureFee: 40000,
-    electricityFee: 15000,
-    gridFee: 68900,
-    gridLoss: 3870,
+    infrastructureFee: feeForDate('infrastructureFee', usedDate),
+    electricityFee: feeForDate('electricityFee', usedDate),
+    gridFee: feeForDate('gridFee', usedDate),
+    gridLoss: feeForDate('gridLoss', usedDate),
     power: Math.floor(Math.random() * 40000),
   }
   const salesTax = Math.floor(Object.values(values).reduce((total, current) => total + current, 0) * 0.2)
@@ -70,13 +75,26 @@ const data = [...new Array(24).keys()].map((value) => {
 })
 const subgroups = Object.keys(data[0]).filter((subgroup) => subgroup !== 'group')
 const groups = data.map((point) => point.group)
+const maxY = data
+  .map((values) => Object.values(values).reduce((total, value) => {
+    if (typeof value === 'number') {
+      return total + value
+    }
+    return total
+  }, 0))
+  .reduce((max, value) => {
+    if (value > max) {
+      return value
+    }
+    return max
+  }, 0)
 
 const x = scaleBand()
   .domain(groups)
   .range([0, width])
   .padding(0.2)
 const y = scaleLinear()
-  .domain([0, 60])
+  .domain([0, Math.max(35, maxY * 1.2)])
   .range([height, 0])
 
 const xAxis = ref<HTMLElement | null>(null)

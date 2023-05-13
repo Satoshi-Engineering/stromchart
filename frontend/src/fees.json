@@ -1,0 +1,44 @@
+[{
+  "id": "infrastructureFee",
+  "label": "Infrastrukturbeitrag",
+  "values": [{
+    "validUntil": null,
+    "amount": 40000
+  }]
+}, {
+  "id": "electricityFee",
+  "label": "Elektrizitätsabgabe",
+  "values": [{
+    "validUntil": 1688162400,
+    "amount": 1000
+  }, {
+    "validUntil": null,
+    "amount": 15000
+  }]
+}, {
+  "id": "gridFee",
+  "label": "Netznutzungsentgelt",
+  "values": [{
+    "validUntil": null,
+    "amount": [{
+      "validUntil": 21600,
+      "value": 34400
+    }, {
+      "validUntil": 79200,
+      "value": 68900
+    }, {
+      "validUntil": 86400,
+      "value": 34400
+    }]
+  }]
+}, {
+  "id": "gridLoss",
+  "label": "Netzverlustentgelt",
+  "values": [{
+    "validUntil": 1677625200,
+    "amount": 23280
+  }, {
+    "validUntil": null,
+    "amount": 3870
+  }]
+}]
