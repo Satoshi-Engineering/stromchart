@@ -1,5 +1,5 @@
 # ------------- VARIABLES
-# configure them in https://gitlab.satoshiengineering.com/satoshiengineering/lightning-tip-cards/-/settings/ci_cd
+# configure them in https://gitlab.satoshiengineering.com/satoshiengineering/stromchart/-/settings/ci_cd
 # - FRONTEND_DEPLOY_SERVER_MAIN
 # - FRONTEND_DEPLOY_SERVER_DEVELOP
 # - FRONTEND_DEPLOY_PATH_MAIN

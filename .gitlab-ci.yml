@@ -2,7 +2,7 @@
 # Cache is deleted after completion of the pipeline.
 
 # ------------- VARIABLES
-# Configure them in https://gitlab.satoshiengineering.com/satoshiengineering/lightning-tip-cards/-/settings/ci_cd
+# Configure them in https://gitlab.satoshiengineering.com/satoshiengineering/stromchart/-/settings/ci_cd
 # There are also frontend/backend specific variables. Look for them in sub-directories.
 # - DEPLOY_USER
 # - DEPLOY_USER_SSH_KEY # can be found in sate access

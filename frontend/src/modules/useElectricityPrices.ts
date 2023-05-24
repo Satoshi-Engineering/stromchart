@@ -1,13 +1,16 @@
 import axios from 'axios'
 import { ref, onBeforeMount } from 'vue'
 
+import { BACKEND_API_ORIGIN } from '@/constants'
+
 export default function useElectricityPrices() {
   const prices = ref()
 
   onBeforeMount(async () => {
-    const start = + new Date() - (1000 * 60 * 60 * 24)
-    const end = + new Date() + (1000 * 60 * 60 * 24)
-    const { data } = await axios.get(`https://api.awattar.at/v1/marketdata?start=${start}&end=${end}`)
+    const year = new Date().getFullYear()
+    const month = String(new Date().getMonth() + 1).padStart(2, '0')
+    const day = String(new Date().getDate()).padStart(2, '0')
+    const { data } = await axios.get(`${BACKEND_API_ORIGIN}/api/prices?day=${year}-${month}-${day}`)
     prices.value = data.data
   })
 

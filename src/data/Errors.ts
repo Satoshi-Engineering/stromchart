@@ -1,4 +1,9 @@
 export enum ErrorCode {
+  UnableToLoadDataFromAwattar = 'UnableToLoadDataFromAwattar',
+  UnableToWriteAwattarData = 'UnableToWriteAwattarData',
+  UnableToReadAwattarData = 'UnableToReadAwattarData',
+  InvalidInput = 'InvalidInput',
+  UnknownError = 'UnknownError',
 }
 
 export class ErrorWithCode {

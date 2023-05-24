@@ -16,6 +16,7 @@ dist-libs
 build
 coverage
 *.local
+data/*
 
 /cypress/videos/
 /cypress/screenshots/
