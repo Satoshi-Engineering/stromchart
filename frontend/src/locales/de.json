@@ -1,5 +1,11 @@
 {
   "errors": {
     "loadingPricesFailed": "Preise konnten nicht vom Server geladen werden."
+  },
+  "components": {
+    "datepicker": {
+      "previous": "Voriger",
+      "next": "Nächster"
+    }
   }
 }

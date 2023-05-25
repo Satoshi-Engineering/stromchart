@@ -14,21 +14,39 @@ export default () => {
       return
     }
     const { value } = (event.target as HTMLInputElement)
-    const newDate = DateTime.fromISO(value).setZone('Europe/Vienna').startOf('day')
+    setDate(DateTime.fromISO(value).setZone('Europe/Vienna').startOf('day'))
+  }
+  
+  const selectPrevDate = () => {
+    setDate(currentDate.value.minus({ days: 1 }))
+  }
+  
+  const selectNextDate = () => {
+    setDate(currentDate.value.plus({ days: 1 }))
+  }
+
+  const setDate = (date: DateTime) => {
     if (
-      !newDate.isValid
-      || newDate < MIN_DATE
-      || newDate > MAX_DATE
+      !date.isValid
+      || date < MIN_DATE
+      || date > MAX_DATE
     ) {
       return
     }
-    currentDate.value = newDate
+    currentDate.value = date
   }
+
+  const prevDateValid = computed(() => currentDate.value.minus({ days: 1 }) >= MIN_DATE)
+  const nextDateValid = computed(() => currentDate.value.plus({ days: 1 }) <= MAX_DATE)
 
   return {
     currentDate,
     currentDateIso,
     currentDateFormatted,
     selectDate,
+    selectPrevDate,
+    selectNextDate,
+    prevDateValid,
+    nextDateValid,
   }
 }

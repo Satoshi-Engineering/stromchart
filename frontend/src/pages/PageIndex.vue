@@ -1,13 +1,30 @@
 <template>
   <div class="flex-1 flex flex-col items-center">
-    <div class="max-w-3xl w-full p-4 text-center">
-      <input
-        type="date"
-        :value="currentDateIso"
-        :min="(MIN_DATE.toISODate() as string)"
-        :max="(MAX_DATE.toISODate() as string)"
-        @change="selectDate"
-      />
+    <div class="max-w-3xl w-full flex p-4 justify-center">
+      <button
+        class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 mr-2 py-2 px-4 rounded-l disabled:opacity-50"
+        :disabled="!prevDateValid || loadingPrices"
+        @click="selectPrevDate"
+      >
+        {{ $t('components.datepicker.previous') }}
+      </button>
+      <label class="bg-gray-300 py-2 px-4">
+        <input
+          type="date"
+          class="bg-transparent"
+          :value="currentDateIso"
+          :min="(MIN_DATE.toISODate() as string)"
+          :max="(MAX_DATE.toISODate() as string)"
+          @change="selectDate"
+        />
+      </label>
+      <button
+        class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 ml-2 py-2 px-4 rounded-r disabled:opacity-50"
+        :disabled="!nextDateValid || loadingPrices"
+        @click="selectNextDate"
+      >
+        {{ $t('components.datepicker.next') }}
+      </button>
     </div>
     <div v-if="showLoadingAnimation" class="flex-1 grid justify-center content-center">
       <AnimatedLoadingWheel />
@@ -64,7 +81,11 @@ import useElectricityPrices from '@/modules/useElectricityPrices'
 import { ELECTRICITY_PRICE_COLOR, ELECTRICITY_TAX_COLOR } from '@/constants'
 
 const route = useRoute()
-const { currentDate, currentDateIso, selectDate } = useDatePicker()
+const {
+  currentDate, currentDateIso,
+  selectDate, selectPrevDate, selectNextDate,
+  prevDateValid, nextDateValid,
+} = useDatePicker()
 const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimation(500, true)
 const { feeForDate, feeById } = useElectricityFees()
 const { loading: loadingPrices, loadingFailed,  priceForDate, loadForDateIso } = useElectricityPrices()
