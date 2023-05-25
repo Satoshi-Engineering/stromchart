@@ -1,6 +1,6 @@
 <template>
-  <div class="flex-1 flex flex-col items-center">
-    <div class="max-w-3xl w-full flex p-4 justify-center">
+  <div class="flex-1 flex flex-col items-center overflow-hidden">
+    <div class="max-w-3xl w-full flex pt-4 justify-center">
       <button
         class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 mr-2 py-2 px-4 rounded-l disabled:opacity-50"
         :disabled="!prevDateValid || loadingPrices"
@@ -16,7 +16,7 @@
           :min="(MIN_DATE.toISODate() as string)"
           :max="(MAX_DATE.toISODate() as string)"
           @change="selectDate"
-        />
+        >
       </label>
       <button
         class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 ml-2 py-2 px-4 rounded-r disabled:opacity-50"
@@ -38,11 +38,6 @@
         :height="height + margins.top + margins.bottom"
       >
         <g :transform="`translate(${margins.left}, ${margins.top})`">
-          <g v-axis-left />
-          <g
-            v-axis-bottom
-            :transform="`translate(0, ${height})`"
-          />
           <g>
             <g
               v-for="bars in stackedData"
@@ -58,7 +53,22 @@
                 :width="x.bandwidth()"
               />
             </g>
+            <g :fill="ELECTRICITY_PRICE_COLOR">
+              <rect
+                v-for="bar in negativeBars"
+                :key="bar.key"
+                :x="x(bar.group)"
+                :y="y(0)"
+                :height="y(bar.power) - y(0)"
+                :width="x.bandwidth()"
+              />
+            </g>
           </g>
+          <g ref="vAxisLeft" />
+          <g
+            ref="vAxisBottom"
+            :transform="`translate(0, ${height})`"
+          />
         </g>
       </svg>
     </div>
@@ -70,17 +80,19 @@ import { axisBottom, axisLeft } from 'd3-axis'
 import { select } from 'd3-selection'
 import { stack } from 'd3-shape'
 import { scaleBand, scaleLinear } from 'd3-scale'
-import { computed, watchEffect } from 'vue'
+import { computed, watchEffect, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
 import useDatePicker, { MIN_DATE, MAX_DATE } from '@/modules/useDatePicker'
+import useBreakpoints from '@/modules/useBreakpoints'
 import useDelayedLoadingAnimation from '@/modules/useDelayedLoadingAnimation'
 import useElectricityFees from '@/modules/useElectricityFees'
 import useElectricityPrices from '@/modules/useElectricityPrices'
 import { ELECTRICITY_PRICE_COLOR, ELECTRICITY_TAX_COLOR } from '@/constants'
 
 const route = useRoute()
+const { width: clientWidth, height: clientHeight, type } = useBreakpoints()
 const {
   currentDate, currentDateIso,
   selectDate, selectPrevDate, selectNextDate,
@@ -109,9 +121,17 @@ const colorsByBarKey = computed<Record<string, string>>(() => ({
   salesTax: ELECTRICITY_TAX_COLOR,
 }))
 
-const margins = { top: 100, right: 100, bottom: 50, left: 100 }
-const width = document.body.clientWidth - margins.left - margins.right
-const height = document.body.clientHeight - 70 - margins.top - margins.bottom
+const margins = computed(() => {
+  if (type.value === 'xs') {
+    return { top: 20, right: 10, bottom: 30, left: 30 }
+  }
+  if (type.value === 'md') {
+    return { top: 20, right: 10, bottom: 30, left: 30 }
+  }
+  return { top: 100, right: 40, bottom: 100, left: 60 }
+})
+const width = computed(() => Math.min(1800, clientWidth.value - margins.value.left - margins.value.right))
+const height = computed(() => clientHeight.value - 70 - margins.value.top - margins.value.bottom)
 
 const excludeFees = computed(() => {
   if (typeof route.query.excludeFees !== 'string') {
@@ -120,16 +140,41 @@ const excludeFees = computed(() => {
   return route.query.excludeFees.split(',')
 })
 
+const negativeBars = computed(() => 
+  [...new Array(24).keys()]
+    .filter((value) => {
+      const usedDate = currentDate.value.set({ hour: value })
+      return priceForDate(usedDate) < 0
+    })
+    .map((value) => {
+      const usedDate = currentDate.value.set({ hour: value })
+      const power = priceForDate(usedDate)
+      const group = `${String(value).padStart(2, '0')}:00`
+      return {
+        key: `negative_price_${group}`,
+        group,
+        power: Math.floor(power / 100) / 100,
+      }
+    }),
+)
+
 const data = computed(() => [...new Array(24).keys()].map((value) => {
   const usedDate = currentDate.value.set({ hour: value })
   const values: Record<string, number> = {}
+
+  const power = priceForDate(usedDate)
+  values.power = Math.max(power, 0)
   Object.keys(feeById).forEach((feeId) => {
     if (excludeFees.value.includes(feeId)) {
       return
     }
     values[feeId] = feeForDate(feeId, usedDate)
   })
-  values.power = priceForDate(usedDate)
+  if (power < 0) {
+    const firstKey = Object.keys(feeById)[0]
+    values[firstKey] += power
+  }
+
   const salesTax = Math.floor(Object.values(values).reduce((total, current) => total + current, 0) * 0.2)
   const valuesInCents = Object.entries({ ...values, salesTax }).reduce((accumulator, [key, value]) => ({
     ...accumulator,
@@ -159,22 +204,27 @@ const maxY = computed(() => data.value
 
 const x = computed(() => scaleBand()
   .domain(groups.value)
-  .range([0, width])
+  .range([0, width.value])
   .padding(0.2))
 const y = computed(() => scaleLinear()
   .domain([0, Math.max(35, maxY.value * 1.2)])
-  .range([height, 0]))
+  .range([height.value, 0]))
 
-const vAxisBottom = {
-  mounted: (el: HTMLElement) => {
-    select(el).call(axisBottom(x.value).tickSizeOuter(0) as any)
-  },
-}
-const vAxisLeft = {
-  mounted: (el: HTMLElement) => {
-    select(el).call(axisLeft(y.value) as any)
-  },
-}
+const vAxisLeft = ref<HTMLElement>()
+watchEffect(() => {
+  if (vAxisLeft.value == null) {
+    return
+  }
+  select(vAxisLeft.value).call(axisLeft(y.value) as any)
+})
+
+const vAxisBottom = ref<HTMLElement>()
+watchEffect(() => {
+  if (vAxisBottom.value == null) {
+    return
+  }
+  select(vAxisBottom.value).call(axisBottom(x.value).tickSizeOuter(0) as any)
+})
 
 const stackedData = computed(() => stack().keys(subgroups.value)(data.value as any))
 </script>
