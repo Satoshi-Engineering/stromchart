@@ -1,1 +1,5 @@
-{}
+{
+  "errors": {
+    "loadingPricesFailed": "Preise konnten nicht vom Server geladen werden."
+  }
+}

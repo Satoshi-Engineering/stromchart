@@ -1,38 +1,46 @@
 <template>
-  <div class="grid justify-items-center text-center">
-    <div class="max-w-3xl w-full p-4">
+  <div class="flex-1 flex flex-col items-center">
+    <div class="max-w-3xl w-full p-4 text-center">
       <HeadlineDefault level="h1">
         Stromchart
       </HeadlineDefault>
     </div>
-    <svg
-      :width="width + margins.left + margins.right"
-      :height="height + margins.top + margins.bottom"
-    >
-      <g :transform="`translate(${margins.left}, ${margins.top})`">
-        <g v-axis-left />
-        <g
-          v-axis-bottom
-          :transform="`translate(0, ${height})`"
-        />
-        <g>
+    <div v-if="showLoadingAnimation" class="flex-1 grid justify-center content-center">
+      <AnimatedLoadingWheel />
+    </div>
+    <div v-else-if="showContent && loadingFailed" class="flex-1 grid justify-center content-center text-red-600">
+      {{ $t('errors.loadingPricesFailed') }}
+    </div>
+    <div v-else-if="showContent">
+      <svg
+        :width="width + margins.left + margins.right"
+        :height="height + margins.top + margins.bottom"
+      >
+        <g :transform="`translate(${margins.left}, ${margins.top})`">
+          <g v-axis-left />
           <g
-            v-for="(bars, index) in stackedData"
-            :key="bars.key"
-            :fill="colors[index]"
-          >
-            <rect
-              v-for="bar in bars"
-              :key="bars.key + bar.data.group"
-              :x="x(String(bar.data.group))"
-              :y="y(bar[1])"
-              :height="y(bar[0]) - y(bar[1])"
-              :width="x.bandwidth()"
-            />
+            v-axis-bottom
+            :transform="`translate(0, ${height})`"
+          />
+          <g>
+            <g
+              v-for="(bars, index) in stackedData"
+              :key="bars.key"
+              :fill="colors[index]"
+            >
+              <rect
+                v-for="bar in bars"
+                :key="bars.key + bar.data.group"
+                :x="x(String(bar.data.group))"
+                :y="y(bar[1])"
+                :height="y(bar[0]) - y(bar[1])"
+                :width="x.bandwidth()"
+              />
+            </g>
           </g>
         </g>
-      </g>
-    </svg>
+      </svg>
+    </div>
   </div>
 </template>
 
@@ -41,14 +49,21 @@ import { axisBottom, axisLeft } from 'd3-axis'
 import { select } from 'd3-selection'
 import { stack } from 'd3-shape'
 import { scaleBand, scaleLinear } from 'd3-scale'
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 
 import HeadlineDefault from '@/components/typography/HeadlineDefault.vue'
+import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
+import useDelayedLoadingAnimation from '@/modules/useDelayedLoadingAnimation'
 import useElectricityFees from '@/modules/useElectricityFees'
 import useElectricityPrices from '@/modules/useElectricityPrices'
 
+const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimation(500, true)
 const { feeForDate } = useElectricityFees()
-const { priceForDate } = useElectricityPrices()
+const { loading: loadingPrices, loadingFailed,  priceForDate } = useElectricityPrices()
+
+watchEffect(() => {
+  loading.value = loadingPrices.value
+})
 
 const colors = ['#B9D8C2', '#9AC2C9', '#8AA1B1', '#4A5043', '#FFCB47', '#9A998C']
 const margins = { top: 100, right: 100, bottom: 50, left: 100 }
