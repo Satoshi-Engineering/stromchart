@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { DateTime } from 'luxon'
 import fs from 'fs'
 import path from 'path'
 
@@ -11,8 +12,8 @@ import { PRICES_DATA_DIR } from '../constants'
  * 
  * @throws
  */
-export const getForDay = async (date: string): Promise<unknown> => {
-  const filename = path.join(PRICES_DATA_DIR, `awattar_${date}.json`)
+export const getForDateIso = async (dateIso: string): Promise<unknown> => {
+  const filename = path.join(PRICES_DATA_DIR, `awattar_${dateIso}.json`)
   try {
     if (fs.existsSync(filename)) {
       return JSON.parse(fs.readFileSync(filename, 'utf8'))
@@ -22,9 +23,9 @@ export const getForDay = async (date: string): Promise<unknown> => {
     throw error
   }
   try {
-    const targetDate = new Date(date)
-    const start = targetDate.getTime() - (1000 * 60 * 60 * 2) // subtract 2 hours as we want the data from 00:00 - 24:00 vienna time
-    const end = start + (1000 * 60 * 60 * 24)
+    const targetDate = DateTime.fromISO(dateIso).setZone('Europe/Vienna').startOf('day')
+    const start = targetDate.toMillis()
+    const end = targetDate.plus({ days: 1 }).toMillis()
     const { data } = await axios.get(`https://api.awattar.at/v1/marketdata?start=${start}&end=${end}`)
     setTimeout(() => {
       try {

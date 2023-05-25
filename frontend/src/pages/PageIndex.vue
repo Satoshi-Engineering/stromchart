@@ -2,7 +2,7 @@
   <div class="flex-1 flex flex-col items-center">
     <div class="max-w-3xl w-full p-4 text-center">
       <HeadlineDefault level="h1">
-        Stromchart
+        {{ currentDateFormatted }}
       </HeadlineDefault>
     </div>
     <div v-if="showLoadingAnimation" class="flex-1 grid justify-center content-center">
@@ -49,20 +49,28 @@ import { axisBottom, axisLeft } from 'd3-axis'
 import { select } from 'd3-selection'
 import { stack } from 'd3-shape'
 import { scaleBand, scaleLinear } from 'd3-scale'
-import { computed, watchEffect } from 'vue'
+import { computed, onBeforeMount, watchEffect } from 'vue'
 
 import HeadlineDefault from '@/components/typography/HeadlineDefault.vue'
 import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
+import useDatePicker from '@/modules/useDatePicker'
 import useDelayedLoadingAnimation from '@/modules/useDelayedLoadingAnimation'
 import useElectricityFees from '@/modules/useElectricityFees'
 import useElectricityPrices from '@/modules/useElectricityPrices'
 
+const { currentDateFormatted, currentDateIso } = useDatePicker()
 const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimation(500, true)
 const { feeForDate } = useElectricityFees()
-const { loading: loadingPrices, loadingFailed,  priceForDate } = useElectricityPrices()
+const { loading: loadingPrices, loadingFailed,  priceForDate, loadForDateIso } = useElectricityPrices()
 
 watchEffect(() => {
   loading.value = loadingPrices.value
+})
+watchEffect(() => {
+  if (currentDateIso.value == null) {
+    return
+  }
+  loadForDateIso(currentDateIso.value)
 })
 
 const colors = ['#B9D8C2', '#9AC2C9', '#8AA1B1', '#4A5043', '#FFCB47', '#9A998C']

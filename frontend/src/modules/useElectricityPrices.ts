@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ref, onBeforeMount } from 'vue'
+import { ref } from 'vue'
 
 import { BACKEND_API_ORIGIN } from '@/constants'
 
@@ -8,14 +8,11 @@ export default function useElectricityPrices() {
   const loadingFailed = ref(false)
   const prices = ref()
 
-  onBeforeMount(async () => {
+  const loadForDateIso = async (dateIso: string) => {
     loading.value = true
     loadingFailed.value = false
-    const year = new Date().getFullYear()
-    const month = String(new Date().getMonth() + 1).padStart(2, '0')
-    const day = String(new Date().getDate()).padStart(2, '0')
     try {
-      const { data } = await axios.get(`${BACKEND_API_ORIGIN}/api/prices?day=${year}-${month}-${day}`)
+      const { data } = await axios.get(`${BACKEND_API_ORIGIN}/api/prices?dateIso=${dateIso}`)
       prices.value = data.data
     } catch (error) {
       console.error(error)
@@ -23,7 +20,7 @@ export default function useElectricityPrices() {
     } finally {
       loading.value = false
     }
-  })
+  }
 
   const priceForDate = (date: Date): number => {
     if (prices.value == null) {
@@ -41,5 +38,5 @@ export default function useElectricityPrices() {
     return Math.floor(usedPrice.marketprice * 1000 * 1.03)
   }
 
-  return { loading, loadingFailed, prices, priceForDate }
+  return { loadForDateIso, loading, loadingFailed, prices, priceForDate }
 }
