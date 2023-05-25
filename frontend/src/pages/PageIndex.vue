@@ -32,7 +32,7 @@
     <div v-else-if="showContent && loadingFailed" class="flex-1 grid justify-center content-center text-red-600">
       {{ $t('errors.loadingPricesFailed') }}
     </div>
-    <div v-else-if="showContent">
+    <div v-else-if="showContent" class="w-full overflow-x-auto">
       <svg
         :width="width + margins.left + margins.right"
         :height="height + margins.top + margins.bottom"
@@ -130,7 +130,7 @@ const margins = computed(() => {
   }
   return { top: 100, right: 40, bottom: 100, left: 60 }
 })
-const width = computed(() => Math.min(1800, clientWidth.value - margins.value.left - margins.value.right))
+const width = computed(() => Math.max(800, Math.min(1800, clientWidth.value - margins.value.left - margins.value.right)))
 const height = computed(() => clientHeight.value - 70 - margins.value.top - margins.value.bottom)
 
 const excludeFees = computed(() => {
