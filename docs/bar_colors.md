@@ -1,5 +1,5 @@
 ### How to change bar colors for fixed values
-* Open this [json file](https://gitlab.satoshiengineering.com/satoshiengineering/stromchart/-/tree/develop/frontend/src)
+* Open this [json file](https://gitlab.satoshiengineering.com/satoshiengineering/stromchart/-/blob/develop/frontend/src/fees.json)
 * Click on "edit"
 * Update the file:
   * **optional:** you can check the typescript definition for the fees here if you want: https://gitlab.satoshiengineering.com/satoshiengineering/stromchart/-/blob/develop/frontend/src/modules/useElectricityFees.ts

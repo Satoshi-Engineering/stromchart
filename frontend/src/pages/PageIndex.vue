@@ -50,6 +50,7 @@ import { select } from 'd3-selection'
 import { stack } from 'd3-shape'
 import { scaleBand, scaleLinear } from 'd3-scale'
 import { computed, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
 
 import HeadlineDefault from '@/components/typography/HeadlineDefault.vue'
 import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
@@ -59,6 +60,7 @@ import useElectricityFees from '@/modules/useElectricityFees'
 import useElectricityPrices from '@/modules/useElectricityPrices'
 import { ELECTRICITY_PRICE_COLOR, ELECTRICITY_TAX_COLOR } from '@/constants'
 
+const route = useRoute()
 const { currentDateFormatted, currentDateIso } = useDatePicker()
 const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimation(500, true)
 const { feeForDate, feeById } = useElectricityFees()
@@ -82,17 +84,26 @@ const colorsByBarKey = computed<Record<string, string>>(() => ({
   power: ELECTRICITY_PRICE_COLOR,
   salesTax: ELECTRICITY_TAX_COLOR,
 }))
-console.log(colorsByBarKey.value)
 
 const margins = { top: 100, right: 100, bottom: 50, left: 100 }
 const width = document.body.clientWidth - margins.left - margins.right
 const height = document.body.clientHeight - 70 - margins.top - margins.bottom
+
+const excludeFees = computed(() => {
+  if (typeof route.query.excludeFees !== 'string') {
+    return []
+  }
+  return route.query.excludeFees.split(',')
+})
 
 const data = computed(() => [...new Array(24).keys()].map((value) => {
   const usedDate = new Date()
   usedDate.setHours(value)
   const values: Record<string, number> = {}
   Object.keys(feeById).forEach((feeId) => {
+    if (excludeFees.value.includes(feeId)) {
+      return
+    }
     values[feeId] = feeForDate(feeId, usedDate)
   })
   values.power = priceForDate(usedDate)
