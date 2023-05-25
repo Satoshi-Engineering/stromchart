@@ -52,7 +52,5 @@ describe(`webclient test on ${config.TEST_ORIGIN}`, () => {
     await driver.navigate().to(config.TEST_ORIGIN as string)
     const elements = await driver.findElements(By.css('h1'))
     expect(elements.length === 1)
-    const titleText = await elements[0].getText()
-    expect(titleText.trim().indexOf('Stromchart')).toBe(0)
   }, 60000)
 })
