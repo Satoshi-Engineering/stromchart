@@ -79,7 +79,7 @@ watchEffect(() => {
 const colorsByBarKey = computed<Record<string, string>>(() => ({
   ...Object.entries(feeById).reduce((accumulator, [key, fee]) => ({
     ...accumulator,
-    [key]: fee.color
+    [key]: fee.color,
   }), {}),
   power: ELECTRICITY_PRICE_COLOR,
   salesTax: ELECTRICITY_TAX_COLOR,
