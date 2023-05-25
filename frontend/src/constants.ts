@@ -7,3 +7,6 @@ export {
   BACKEND_API_ORIGIN,
 }
 export const DEFAULT_DOCUMENT_TITLE = import.meta.env.VITE_DEFAULT_DOCUMENT_TITLE || 'Stromchart'
+
+export const ELECTRICITY_PRICE_COLOR = '#FFCB47'
+export const ELECTRICITY_TAX_COLOR = '#9A998C'

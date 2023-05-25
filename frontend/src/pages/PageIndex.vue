@@ -24,9 +24,9 @@
           />
           <g>
             <g
-              v-for="(bars, index) in stackedData"
+              v-for="bars in stackedData"
               :key="bars.key"
-              :fill="colors[index]"
+              :fill="colorsByBarKey[bars.key]"
             >
               <rect
                 v-for="bar in bars"
@@ -49,7 +49,7 @@ import { axisBottom, axisLeft } from 'd3-axis'
 import { select } from 'd3-selection'
 import { stack } from 'd3-shape'
 import { scaleBand, scaleLinear } from 'd3-scale'
-import { computed, onBeforeMount, watchEffect } from 'vue'
+import { computed, watchEffect } from 'vue'
 
 import HeadlineDefault from '@/components/typography/HeadlineDefault.vue'
 import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
@@ -57,10 +57,11 @@ import useDatePicker from '@/modules/useDatePicker'
 import useDelayedLoadingAnimation from '@/modules/useDelayedLoadingAnimation'
 import useElectricityFees from '@/modules/useElectricityFees'
 import useElectricityPrices from '@/modules/useElectricityPrices'
+import { ELECTRICITY_PRICE_COLOR, ELECTRICITY_TAX_COLOR } from '@/constants'
 
 const { currentDateFormatted, currentDateIso } = useDatePicker()
 const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimation(500, true)
-const { feeForDate } = useElectricityFees()
+const { feeForDate, feeById } = useElectricityFees()
 const { loading: loadingPrices, loadingFailed,  priceForDate, loadForDateIso } = useElectricityPrices()
 
 watchEffect(() => {
@@ -73,7 +74,16 @@ watchEffect(() => {
   loadForDateIso(currentDateIso.value)
 })
 
-const colors = ['#B9D8C2', '#9AC2C9', '#8AA1B1', '#4A5043', '#FFCB47', '#9A998C']
+const colorsByBarKey = computed<Record<string, string>>(() => ({
+  ...Object.entries(feeById).reduce((accumulator, [key, fee]) => ({
+    ...accumulator,
+    [key]: fee.color
+  }), {}),
+  power: ELECTRICITY_PRICE_COLOR,
+  salesTax: ELECTRICITY_TAX_COLOR,
+}))
+console.log(colorsByBarKey.value)
+
 const margins = { top: 100, right: 100, bottom: 50, left: 100 }
 const width = document.body.clientWidth - margins.left - margins.right
 const height = document.body.clientHeight - 70 - margins.top - margins.bottom

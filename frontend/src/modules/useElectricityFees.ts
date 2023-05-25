@@ -15,6 +15,7 @@ type FeeValues = {
 type Fee = {
   id: string
   label: string
+  color: string
   values: FeeValues[]
 }
 
