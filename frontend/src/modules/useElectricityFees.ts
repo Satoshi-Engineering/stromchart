@@ -1,3 +1,5 @@
+import type { DateTime } from 'luxon'
+
 import fees from '@/fees.json'
 
 /**
@@ -24,16 +26,16 @@ const feeById: Record<string, Fee> = (fees as Fee[]).reduce((accumulator, fee) =
   [fee.id]: fee,
 }),  {})
 
-const feeForDate = (fee: string, date: Date): number => {
+const feeForDate = (fee: string, date: DateTime): number => {
   if (feeById[fee] == null) {
     return 0
   }
-  const usedValue = feeById[fee].values.find(({ validUntil }) => validUntil == null || new Date(validUntil * 1000) > date)
+  const usedValue = feeById[fee].values.find(({ validUntil }) => validUntil == null || validUntil > date.toUnixInteger())
   if (typeof usedValue?.amount === 'number') {
     return usedValue.amount
   }
   if (Array.isArray(usedValue?.amount)) {
-    const secondsOfDay = date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds()
+    const secondsOfDay = date.hour * 3600 + date.minute * 60 + date.second
     const usedValueForDay = usedValue?.amount.find(({ validUntil }) => validUntil > secondsOfDay)
     if (usedValueForDay != null) {
       return usedValueForDay.value

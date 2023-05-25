@@ -1,9 +1,13 @@
 <template>
   <div class="flex-1 flex flex-col items-center">
     <div class="max-w-3xl w-full p-4 text-center">
-      <HeadlineDefault level="h1">
-        {{ currentDateFormatted }}
-      </HeadlineDefault>
+      <input
+        type="date"
+        :value="currentDateIso"
+        :min="(MIN_DATE.toISODate() as string)"
+        :max="(MAX_DATE.toISODate() as string)"
+        @change="selectDate"
+      />
     </div>
     <div v-if="showLoadingAnimation" class="flex-1 grid justify-center content-center">
       <AnimatedLoadingWheel />
@@ -52,16 +56,15 @@ import { scaleBand, scaleLinear } from 'd3-scale'
 import { computed, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 
-import HeadlineDefault from '@/components/typography/HeadlineDefault.vue'
 import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
-import useDatePicker from '@/modules/useDatePicker'
+import useDatePicker, { MIN_DATE, MAX_DATE } from '@/modules/useDatePicker'
 import useDelayedLoadingAnimation from '@/modules/useDelayedLoadingAnimation'
 import useElectricityFees from '@/modules/useElectricityFees'
 import useElectricityPrices from '@/modules/useElectricityPrices'
 import { ELECTRICITY_PRICE_COLOR, ELECTRICITY_TAX_COLOR } from '@/constants'
 
 const route = useRoute()
-const { currentDateFormatted, currentDateIso } = useDatePicker()
+const { currentDate, currentDateIso, selectDate } = useDatePicker()
 const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimation(500, true)
 const { feeForDate, feeById } = useElectricityFees()
 const { loading: loadingPrices, loadingFailed,  priceForDate, loadForDateIso } = useElectricityPrices()
@@ -97,8 +100,7 @@ const excludeFees = computed(() => {
 })
 
 const data = computed(() => [...new Array(24).keys()].map((value) => {
-  const usedDate = new Date()
-  usedDate.setHours(value)
+  const usedDate = currentDate.value.set({ hour: value })
   const values: Record<string, number> = {}
   Object.keys(feeById).forEach((feeId) => {
     if (excludeFees.value.includes(feeId)) {

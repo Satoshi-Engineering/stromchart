@@ -1,4 +1,5 @@
 import axios from 'axios'
+import type { DateTime } from 'luxon'
 import { ref } from 'vue'
 
 import { BACKEND_API_ORIGIN } from '@/constants'
@@ -22,14 +23,14 @@ export default function useElectricityPrices() {
     }
   }
 
-  const priceForDate = (date: Date): number => {
+  const priceForDate = (date: DateTime): number => {
     if (prices.value == null) {
       return 0
     }
     const usedPrice = prices.value.find(
       ({ start_timestamp, end_timestamp }: { start_timestamp: number, end_timestamp: number }) => (
-        date > new Date(start_timestamp)
-        && date < new Date(end_timestamp)
+        date.toMillis() >= start_timestamp
+        && date.toMillis() <= end_timestamp
       ),
     )
     if (usedPrice == null) {
