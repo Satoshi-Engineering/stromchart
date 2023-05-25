@@ -44,7 +44,8 @@ Do _not_ use the "TypeScript Vue Plugin (Volar)", but use "take over mode" of Vo
 * Disable "TypeScript and JavaScript Language Support" for Workspace only
 
 ### Additional Infos
-[Bar Colors](docs/bar_colors.md)
+* [Bar Colors](docs/bar_colors.md)
+* [Exclude Fees](docs/exclude_fees.md)
 
 ## Run from source
 
