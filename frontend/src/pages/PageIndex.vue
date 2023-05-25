@@ -91,13 +91,11 @@ const height = document.body.clientHeight - 70 - margins.top - margins.bottom
 const data = computed(() => [...new Array(24).keys()].map((value) => {
   const usedDate = new Date()
   usedDate.setHours(value)
-  const values = {
-    infrastructureFee: feeForDate('infrastructureFee', usedDate),
-    electricityFee: feeForDate('electricityFee', usedDate),
-    gridFee: feeForDate('gridFee', usedDate),
-    gridLoss: feeForDate('gridLoss', usedDate),
-    power: priceForDate(usedDate),
-  }
+  const values: Record<string, number> = {}
+  Object.keys(feeById).forEach((feeId) => {
+    values[feeId] = feeForDate(feeId, usedDate)
+  })
+  values.power = priceForDate(usedDate)
   const salesTax = Math.floor(Object.values(values).reduce((total, current) => total + current, 0) * 0.2)
   const valuesInCents = Object.entries({ ...values, salesTax }).reduce((accumulator, [key, value]) => ({
     ...accumulator,
