@@ -30,7 +30,7 @@ export default function useElectricityPrices() {
     const usedPrice = prices.value.find(
       ({ start_timestamp, end_timestamp }: { start_timestamp: number, end_timestamp: number }) => (
         date.toMillis() >= start_timestamp
-        && date.toMillis() <= end_timestamp
+        && date.toMillis() < end_timestamp
       ),
     )
     if (usedPrice == null) {
