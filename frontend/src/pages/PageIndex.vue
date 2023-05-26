@@ -2,12 +2,11 @@
   <div class="flex-1 flex flex-col items-center overflow-hidden">
     <div class="max-w-3xl w-full flex pt-4 justify-center">
       <button
-        v-if="type !== 'xs'"
         class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 mr-2 py-2 px-4 rounded-l disabled:opacity-50"
         :disabled="!prevDateValid || (currentDateIso != null && loadingPrices.includes(currentDateIso))"
         @click="selectPrevDate"
       >
-        {{ $t('components.datepicker.previous') }}
+        {{ type === 'xs' ? '<' : $t('components.datepicker.previous') }}
       </button>
       <label class="bg-gray-300 py-2 px-4">
         <input
@@ -20,12 +19,11 @@
         >
       </label>
       <button
-        v-if="type !== 'xs'"
         class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 ml-2 py-2 px-4 rounded-r disabled:opacity-50"
         :disabled="!nextDateValid || (currentDateIso != null && loadingPrices.includes(currentDateIso))"
         @click="selectNextDate"
       >
-        {{ $t('components.datepicker.next') }}
+        {{ type === 'xs' ? '>' : $t('components.datepicker.next') }}
       </button>
     </div>
     <div v-if="showLoadingAnimation" class="flex-1 grid justify-center content-center">
