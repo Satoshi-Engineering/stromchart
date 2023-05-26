@@ -29,6 +29,9 @@ export const getForDateIso = async (dateIso: string): Promise<unknown> => {
     const { data } = await axios.get(`https://api.awattar.at/v1/marketdata?start=${start}&end=${end}`)
     setTimeout(() => {
       try {
+        if (data.data.length === 0) {
+          return
+        }
         fs.writeFileSync(filename, JSON.stringify(data.data), 'utf8')
       } catch (error) {
         console.error(ErrorCode.UnableToWriteAwattarData, filename, error)

@@ -1,33 +1,37 @@
 import axios from 'axios'
 import type { DateTime } from 'luxon'
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 
 import { BACKEND_API_ORIGIN } from '@/constants'
 
 export default function useElectricityPrices() {
-  const loading = ref()
-  const loadingFailed = ref(false)
-  const prices = ref()
+  const loading = ref<string[]>([])
+  const loadingFailed = ref<string[]>([])
+  const prices = reactive<Record<string, any[]>>({})
 
   const loadForDateIso = async (dateIso: string) => {
-    loading.value = true
-    loadingFailed.value = false
+    if (prices[dateIso] != null || loading.value.includes(dateIso)) {
+      return
+    }
+    loading.value = [...loading.value, dateIso]
+    loadingFailed.value = loadingFailed.value.filter((currentDateIso) => currentDateIso !== dateIso)
     try {
       const { data } = await axios.get(`${BACKEND_API_ORIGIN}/api/prices?dateIso=${dateIso}`)
-      prices.value = data.data
+      prices[dateIso] = data.data
     } catch (error) {
       console.error(error)
-      loadingFailed.value = true
+      loadingFailed.value = [...loadingFailed.value, dateIso]
     } finally {
-      loading.value = false
+      loading.value = loading.value.filter((currentDateIso) => currentDateIso !== dateIso)
     }
   }
 
   const priceForDate = (date: DateTime): number => {
-    if (prices.value == null) {
+    const dateIso = date.toISODate()
+    if (dateIso == null || prices[dateIso] == null) {
       return 0
     }
-    const usedPrice = prices.value.find(
+    const usedPrice = prices[dateIso].find(
       ({ start_timestamp, end_timestamp }: { start_timestamp: number, end_timestamp: number }) => (
         date.toMillis() >= start_timestamp
         && date.toMillis() < end_timestamp

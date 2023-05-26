@@ -4,7 +4,7 @@
       <button
         v-if="type !== 'xs'"
         class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 mr-2 py-2 px-4 rounded-l disabled:opacity-50"
-        :disabled="!prevDateValid || loadingPrices"
+        :disabled="!prevDateValid || (currentDateIso != null && loadingPrices.includes(currentDateIso))"
         @click="selectPrevDate"
       >
         {{ $t('components.datepicker.previous') }}
@@ -14,15 +14,15 @@
           type="date"
           class="bg-transparent outline-none"
           :value="currentDateIso"
-          :min="(MIN_DATE.toISODate() as string)"
-          :max="(MAX_DATE.toISODate() as string)"
+          :min="(minDate.toISODate() as string)"
+          :max="(maxDate.toISODate() as string)"
           @change="selectDate"
         >
       </label>
       <button
         v-if="type !== 'xs'"
         class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 ml-2 py-2 px-4 rounded-r disabled:opacity-50"
-        :disabled="!nextDateValid || loadingPrices"
+        :disabled="!nextDateValid || (currentDateIso != null && loadingPrices.includes(currentDateIso))"
         @click="selectNextDate"
       >
         {{ $t('components.datepicker.next') }}
@@ -31,7 +31,10 @@
     <div v-if="showLoadingAnimation" class="flex-1 grid justify-center content-center">
       <AnimatedLoadingWheel />
     </div>
-    <div v-else-if="showContent && loadingFailed" class="flex-1 grid justify-center content-center text-red-600">
+    <div
+      v-else-if="showContent && currentDateIso != null && loadingFailed.includes(currentDateIso)"
+      class="flex-1 grid justify-center content-center text-red-600"
+    >
       {{ $t('errors.loadingPricesFailed') }}
     </div>
     <div v-else-if="showContent" class="w-full overflow-x-auto">
@@ -82,11 +85,12 @@ import { axisBottom, axisLeft } from 'd3-axis'
 import { select } from 'd3-selection'
 import { stack } from 'd3-shape'
 import { scaleBand, scaleLinear } from 'd3-scale'
-import { computed, watchEffect, ref } from 'vue'
+import { DateTime } from 'luxon'
+import { computed, watchEffect, ref, onBeforeMount } from 'vue'
 import { useRoute } from 'vue-router'
 
 import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
-import useDatePicker, { MIN_DATE, MAX_DATE } from '@/modules/useDatePicker'
+import useDatePicker from '@/modules/useDatePicker'
 import useBreakpoints from '@/modules/useBreakpoints'
 import useDelayedLoadingAnimation from '@/modules/useDelayedLoadingAnimation'
 import useElectricityFees from '@/modules/useElectricityFees'
@@ -96,7 +100,7 @@ import { ELECTRICITY_PRICE_COLOR, ELECTRICITY_TAX_COLOR } from '@/constants'
 const route = useRoute()
 const { width: clientWidth, height: clientHeight, type } = useBreakpoints()
 const {
-  currentDate, currentDateIso,
+  minDate, maxDate, currentDate, currentDateIso,
   selectDate, selectPrevDate, selectNextDate,
   prevDateValid, nextDateValid,
 } = useDatePicker()
@@ -105,13 +109,36 @@ const { feeForDate, feeById } = useElectricityFees()
 const { loading: loadingPrices, loadingFailed,  priceForDate, loadForDateIso } = useElectricityPrices()
 
 watchEffect(() => {
-  loading.value = loadingPrices.value
+  if (currentDateIso.value == null) {
+    return
+  }
+  loading.value = loadingPrices.value.includes(currentDateIso.value)
 })
 watchEffect(() => {
   if (currentDateIso.value == null) {
     return
   }
   loadForDateIso(currentDateIso.value)
+  const dateIsoPrev = currentDate.value.minus({ days: 1 }).toISODate()
+  if (dateIsoPrev != null) {
+    loadForDateIso(dateIsoPrev)
+  }
+  const dateIsoNext = currentDate.value.plus({ days: 1 }).toISODate()
+  if (dateIsoNext != null) {
+    loadForDateIso(dateIsoNext)
+  }
+})
+
+// load data for tomorrow, so we are able to tell if the next button should be enabled
+onBeforeMount(async () => {
+  const dateIso = DateTime.now().setZone('Europe/Vienna').endOf('day').plus({ days: 1 }).toISODate()
+  if (dateIso == null) {
+    return
+  }
+  await loadForDateIso(dateIso)
+  if (priceForDate(DateTime.now().setZone('Europe/Vienna').plus({ days: 1 })) > 0) {
+    maxDate.value = maxDate.value.plus({ days: 1 })
+  }
 })
 
 const colorsByBarKey = computed<Record<string, string>>(() => ({

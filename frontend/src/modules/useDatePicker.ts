@@ -1,10 +1,10 @@
 import { DateTime } from 'luxon'
 import { computed, ref } from 'vue'
 
-export const MIN_DATE = DateTime.fromISO('2023-01-01').setZone('Europe/Vienna').startOf('day')
-export const MAX_DATE = DateTime.now().setZone('Europe/Vienna').endOf('day').plus({ days: 1 })
-
 export default () => {
+  const minDate = ref(DateTime.fromISO('2023-01-01').setZone('Europe/Vienna').startOf('day'))
+  const maxDate = ref(DateTime.now().setZone('Europe/Vienna').endOf('day'))
+
   const currentDate = ref(DateTime.now().setZone('Europe/Vienna').startOf('day'))
   const currentDateIso = computed(() => currentDate.value.toISODate())
   const currentDateFormatted = computed(() => currentDate.value.setLocale('de').toLocaleString(DateTime.DATE_MED))
@@ -28,18 +28,20 @@ export default () => {
   const setDate = (date: DateTime) => {
     if (
       !date.isValid
-      || date < MIN_DATE
-      || date > MAX_DATE
+      || date < minDate.value
+      || date > maxDate.value
     ) {
       return
     }
     currentDate.value = date
   }
 
-  const prevDateValid = computed(() => currentDate.value.minus({ days: 1 }) >= MIN_DATE)
-  const nextDateValid = computed(() => currentDate.value.plus({ days: 1 }) <= MAX_DATE)
+  const prevDateValid = computed(() => currentDate.value.minus({ days: 1 }) >= minDate.value)
+  const nextDateValid = computed(() => currentDate.value.plus({ days: 1 }) <= maxDate.value)
 
   return {
+    minDate,
+    maxDate,
     currentDate,
     currentDateIso,
     currentDateFormatted,
