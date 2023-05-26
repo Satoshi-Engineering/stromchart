@@ -2,6 +2,7 @@
   <div class="flex-1 flex flex-col items-center overflow-hidden">
     <div class="max-w-3xl w-full flex pt-4 justify-center">
       <button
+        v-if="type !== 'xs'"
         class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 mr-2 py-2 px-4 rounded-l disabled:opacity-50"
         :disabled="!prevDateValid || loadingPrices"
         @click="selectPrevDate"
@@ -11,7 +12,7 @@
       <label class="bg-gray-300 py-2 px-4">
         <input
           type="date"
-          class="bg-transparent"
+          class="bg-transparent outline-none"
           :value="currentDateIso"
           :min="(MIN_DATE.toISODate() as string)"
           :max="(MAX_DATE.toISODate() as string)"
@@ -19,6 +20,7 @@
         >
       </label>
       <button
+        v-if="type !== 'xs'"
         class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 ml-2 py-2 px-4 rounded-r disabled:opacity-50"
         :disabled="!nextDateValid || loadingPrices"
         @click="selectNextDate"
