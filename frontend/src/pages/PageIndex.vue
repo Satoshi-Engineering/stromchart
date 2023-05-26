@@ -75,6 +75,19 @@
             ref="vAxisBottom"
             :transform="`translate(0, ${height})`"
           />
+          <g
+            :font-size="type === 'xs' ? '10' : '12'"
+            font-family="sans-serif"
+            text-anchor="middle"
+          >
+            <text
+              v-for="bar in barsTotal"
+              fill="currentColor"
+              :key="bar.key"
+              :y="y(bar.value) - 5"
+              :x="(x(bar.group) || -5000) + x.bandwidth() / 2"
+            >{{ formatNumber(bar.value, 2) }}</text>
+          </g>
         </g>
       </svg>
     </div>
@@ -91,6 +104,7 @@ import { computed, watchEffect, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
+import formatNumber from '@/modules/formatNumber'
 import useDatePicker from '@/modules/useDatePicker'
 import useBreakpoints from '@/modules/useBreakpoints'
 import useDelayedLoadingAnimation from '@/modules/useDelayedLoadingAnimation'
@@ -186,7 +200,7 @@ const negativeBars = computed(() =>
     }),
 )
 
-const data = computed(() => [...new Array(24).keys()].map((value) => {
+const data = computed<Record<string, string | number>[]>(() => [...new Array(24).keys()].map((value) => {
   const usedDate = currentDate.value.set({ hour: value })
   const values: Record<string, number> = {}
 
@@ -215,9 +229,9 @@ const data = computed(() => [...new Array(24).keys()].map((value) => {
   }
 }))
 const subgroups = computed(() => Object.keys(data.value[0]).filter((subgroup) => subgroup !== 'group'))
-const groups = computed(() => data.value.map((point) => point.group))
+const groups = computed(() => data.value.map((point) => String(point.group)))
 const maxY = computed(() => data.value
-  .map((values) => Object.values(values).reduce((total, value) => {
+  .map((values) => Object.values(values).reduce((total: number, value: string | number) => {
     if (typeof value === 'number') {
       return total + value
     }
@@ -253,6 +267,20 @@ watchEffect(() => {
   }
   select(vAxisBottom.value).call(axisBottom(x.value).tickSizeOuter(0) as any)
 })
+
+const barsTotal = computed(() => data.value.map((values) => {
+  const value = Object.entries(values).reduce((total: number, [, value]) => {
+    if (typeof value !== 'number') {
+      return total
+    }
+    return total + value
+  }, 0)
+  return {
+    key: `valuesTotal_${values.group}`,
+    group: String(values.group),
+    value,
+  }
+}))
 
 const stackedData = computed(() => stack().keys(subgroups.value)(data.value as any))
 </script>
