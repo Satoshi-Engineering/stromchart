@@ -1,10 +1,7 @@
 import { DateTime } from 'luxon'
-import { computed, ref } from 'vue'
+import { computed, ref, type Ref, type ComputedRef } from 'vue'
 
-export default () => {
-  const minDate = ref(DateTime.fromISO('2023-01-01').setZone('Europe/Vienna').startOf('day'))
-  const maxDate = ref(DateTime.now().setZone('Europe/Vienna').endOf('day'))
-
+export default (minDate: Ref<DateTime> | ComputedRef<DateTime>, maxDate: Ref<DateTime> | ComputedRef<DateTime>) => {
   const currentDate = ref(DateTime.now().setZone('Europe/Vienna').startOf('day'))
   const currentDateIso = computed(() => currentDate.value.toISODate())
   const currentDateFormatted = computed(() => currentDate.value.setLocale('de').toLocaleString(DateTime.DATE_MED))
@@ -40,8 +37,6 @@ export default () => {
   const nextDateValid = computed(() => currentDate.value.plus({ days: 1 }) <= maxDate.value)
 
   return {
-    minDate,
-    maxDate,
     currentDate,
     currentDateIso,
     currentDateFormatted,

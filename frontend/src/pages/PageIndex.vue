@@ -39,6 +39,7 @@
     </div>
     <div v-else-if="showContent" class="w-full overflow-x-auto">
       <svg
+        class="mx-auto"
         :width="width + margins.left + margins.right"
         :height="height + margins.top + margins.bottom"
       >
@@ -86,7 +87,7 @@ import { select } from 'd3-selection'
 import { stack } from 'd3-shape'
 import { scaleBand, scaleLinear } from 'd3-scale'
 import { DateTime } from 'luxon'
-import { computed, watchEffect, ref, onBeforeMount } from 'vue'
+import { computed, watchEffect, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
@@ -99,14 +100,24 @@ import { ELECTRICITY_PRICE_COLOR, ELECTRICITY_TAX_COLOR } from '@/constants'
 
 const route = useRoute()
 const { width: clientWidth, height: clientHeight, type } = useBreakpoints()
-const {
-  minDate, maxDate, currentDate, currentDateIso,
-  selectDate, selectPrevDate, selectNextDate,
-  prevDateValid, nextDateValid,
-} = useDatePicker()
 const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimation(500, true)
 const { feeForDate, feeById } = useElectricityFees()
 const { loading: loadingPrices, loadingFailed,  priceForDate, loadForDateIso } = useElectricityPrices()
+
+const minDate = ref(DateTime.fromISO('2023-01-01').setZone('Europe/Vienna').startOf('day'))
+const maxDate = computed(() => {
+  const dateTomorrow = DateTime.now().setZone('Europe/Vienna').endOf('day').plus({ days: 1 })
+  if (priceForDate(dateTomorrow) === 0) {
+    return DateTime.now().setZone('Europe/Vienna').endOf('day')
+  }
+  return dateTomorrow
+})
+
+const {
+  currentDate, currentDateIso,
+  selectDate, selectPrevDate, selectNextDate,
+  prevDateValid, nextDateValid,
+} = useDatePicker(minDate, maxDate)
 
 watchEffect(() => {
   if (currentDateIso.value == null) {
@@ -126,18 +137,6 @@ watchEffect(() => {
   const dateIsoNext = currentDate.value.plus({ days: 1 }).toISODate()
   if (dateIsoNext != null) {
     loadForDateIso(dateIsoNext)
-  }
-})
-
-// load data for tomorrow, so we are able to tell if the next button should be enabled
-onBeforeMount(async () => {
-  const dateIso = DateTime.now().setZone('Europe/Vienna').endOf('day').plus({ days: 1 }).toISODate()
-  if (dateIso == null) {
-    return
-  }
-  await loadForDateIso(dateIso)
-  if (priceForDate(DateTime.now().setZone('Europe/Vienna').plus({ days: 1 })) > 0) {
-    maxDate.value = maxDate.value.plus({ days: 1 })
   }
 })
 
