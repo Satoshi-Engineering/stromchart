@@ -7,5 +7,9 @@
       "previous": "Voriger",
       "next": "Nächster"
     }
+  },
+  "priceComponents": {
+    "labelPrice": "Strompreis",
+    "salesTax": "Umsatzsteuer"
   }
 }

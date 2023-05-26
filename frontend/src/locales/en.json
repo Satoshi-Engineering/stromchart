@@ -7,5 +7,9 @@
       "previous": "Previous",
       "next": "Next"
     }
+  },
+  "priceComponents": {
+    "labelPrice": "Electricity price",
+    "salesTax": "Sales tax"
   }
 }

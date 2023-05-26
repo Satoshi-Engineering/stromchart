@@ -1,8 +1,8 @@
 <template>
   <div class="flex-1 flex flex-col items-center overflow-hidden">
-    <div class="max-w-3xl w-full flex pt-4 justify-center">
+    <div class="relative w-full flex mt-4 px-2 justify-left md:justify-center">
       <button
-        class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 mr-2 py-2 px-4 rounded-l disabled:opacity-50"
+        class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 mx-2 py-2 px-4 rounded-l disabled:opacity-50"
         :disabled="!prevDateValid || (currentDateIso != null && loadingPrices.includes(currentDateIso))"
         @click="selectPrevDate"
       >
@@ -19,11 +19,17 @@
         >
       </label>
       <button
-        class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 ml-2 py-2 px-4 rounded-r disabled:opacity-50"
+        class="bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 mx-2 py-2 px-4 rounded-r disabled:opacity-50"
         :disabled="!nextDateValid || (currentDateIso != null && loadingPrices.includes(currentDateIso))"
         @click="selectNextDate"
       >
         {{ type === 'xs' ? '>' : $t('components.datepicker.next') }}
+      </button>
+      <button
+        class="absolute right-0 h-full bg-gray-300 hover:enabled:bg-gray-400 text-gray-800 mr-2 py-2 px-4 rounded disabled:opacity-50"
+        @click="showInfo = !showInfo"
+      >
+        ?
       </button>
     </div>
     <div v-if="showLoadingAnimation" class="flex-1 grid justify-center content-center">
@@ -80,14 +86,34 @@
           >
             <text
               v-for="bar in barsTotal"
-              fill="currentColor"
               :key="bar.key"
+              fill="currentColor"
               :y="y(bar.value) - 5"
               :x="(x(bar.group) || -5000) + x.bandwidth() / 2"
             >{{ formatNumber(bar.value, 2) }}</text>
           </g>
         </g>
       </svg>
+    </div>
+
+    <div
+      v-if="showInfo"
+      class="fixed right-0 top-0 mt-2 mr-2 max-w-sm py-2 pl-4 pr-8 bg-white border border-gray-200 rounded shadow"
+      @click="showInfo = false"
+    >
+      <button class="absolute right-0 top-0 py-2 px-3">
+        X
+      </button>
+      <div
+        v-for="info in infos"
+        :key="info.id"
+        class="whitespace-nowrap"
+      >
+        <span
+          class="inline-block h-3 w-3 mr-2 border border-gray-200 rounded"
+          :style="{ backgroundColor: info.color }"
+        /> {{ info.label }}
+      </div>
     </div>
   </div>
 </template>
@@ -100,6 +126,7 @@ import { scaleBand, scaleLinear } from 'd3-scale'
 import { DateTime } from 'luxon'
 import { computed, watchEffect, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
 import formatNumber from '@/modules/formatNumber'
@@ -111,6 +138,8 @@ import useElectricityPrices from '@/modules/useElectricityPrices'
 import { ELECTRICITY_PRICE_COLOR, ELECTRICITY_TAX_COLOR } from '@/constants'
 
 const route = useRoute()
+const { t } = useI18n()
+
 const { width: clientWidth, height: clientHeight, type } = useBreakpoints()
 const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimation(500, true)
 const { feeForDate, feeById } = useElectricityFees()
@@ -281,4 +310,20 @@ const barsTotal = computed(() => data.value.map((values) => {
 }))
 
 const stackedData = computed(() => stack().keys(subgroups.value)(data.value as any))
+
+// info about colors
+const showInfo = ref(false)
+const infos = computed(() => [
+  {
+    id: 'electricity_tax',
+    color: ELECTRICITY_TAX_COLOR,
+    label: t('priceComponents.salesTax'),
+  },
+  ...Object.values(feeById).filter((fee) => !excludeFees.value.includes(fee.id)).reverse(),
+  {
+    id: 'electricity_price',
+    color: ELECTRICITY_PRICE_COLOR,
+    label: t('priceComponents.labelPrice'),
+  },
+])
 </script>
