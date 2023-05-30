@@ -119,6 +119,7 @@
 </template>
 
 <script setup lang="ts">
+import { max } from 'd3-array'
 import { axisBottom, axisLeft } from 'd3-axis'
 import { select } from 'd3-selection'
 import { stack } from 'd3-shape'
@@ -191,13 +192,19 @@ const colorsByBarKey = computed<Record<string, string>>(() => ({
 }))
 
 const margins = computed(() => {
+  let margins = { top: 100, right: 40, bottom: 100, left: 60 }
   if (type.value === 'xs') {
-    return { top: 20, right: 10, bottom: 30, left: 30 }
+    margins = { top: 20, right: 10, bottom: 30, left: 30 }
   }
   if (type.value === 'md') {
-    return { top: 20, right: 10, bottom: 30, left: 30 }
+    margins = { top: 20, right: 10, bottom: 30, left: 30 }
   }
-  return { top: 100, right: 40, bottom: 100, left: 60 }
+  const maxNegative = max(negativeBars.value.map((data) => Math.abs(data.power))) || 0
+  if (maxNegative > 0) {
+    const minMarginBottom = (clientHeight.value - 70 - margins.top) * (maxNegative / (maxNegative + 35))
+    margins.bottom = Math.max(minMarginBottom, margins.bottom)
+  }
+  return margins
 })
 const width = computed(() => Math.max(800, Math.min(1800, clientWidth.value - margins.value.left - margins.value.right)))
 const height = computed(() => clientHeight.value - 70 - margins.value.top - margins.value.bottom)
