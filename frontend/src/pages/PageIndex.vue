@@ -59,7 +59,7 @@
                 :key="bars.key + bar.data.group"
                 :x="x(String(bar.data.group))"
                 :y="y(bar[1])"
-                :height="y(bar[0]) - y(bar[1])"
+                :height="Math.max(y(bar[0]) - y(bar[1]), 0)"
                 :width="x.bandwidth()"
               />
             </g>
@@ -88,7 +88,7 @@
               v-for="bar in barsTotal"
               :key="bar.key"
               fill="currentColor"
-              :y="y(bar.value) - 5"
+              :y="y(Math.max(bar.value, 0)) - 5"
               :x="(x(bar.group) || -5000) + x.bandwidth() / 2"
             >{{ formatNumber(bar.value, 2) }}</text>
           </g>
@@ -240,8 +240,16 @@ const data = computed<Record<string, string | number>[]>(() => [...new Array(24)
     values[feeId] = feeForDate(feeId, usedDate)
   })
   if (power < 0) {
-    const firstKey = Object.keys(feeById)[0]
-    values[firstKey] += power
+    let powerSubtracted = 0
+    Object.keys(feeById).forEach((feeId) => {
+      if (excludeFees.value.includes(feeId)) {
+        return
+      }
+      const powerToSubtract = Math.min(Math.abs(power) - powerSubtracted, values[feeId])
+      powerSubtracted += powerToSubtract
+      values[feeId] -= powerToSubtract
+    })
+    values.power = power + powerSubtracted
   }
 
   const salesTax = Math.floor(Object.values(values).reduce((total, current) => total + current, 0) * 0.2)
