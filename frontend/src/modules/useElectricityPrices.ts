@@ -26,7 +26,7 @@ export default function useElectricityPrices() {
     }
   }
 
-  const priceForDate = (date: DateTime): number => {
+  const priceForDate = (date: DateTime, electricitySupplier = 'EnergieSteiermark'): number => {
     const dateIso = date.toISODate()
     if (dateIso == null || prices[dateIso] == null) {
       return 0
@@ -41,12 +41,15 @@ export default function useElectricityPrices() {
       return 0
     }
     // awattar takes 3 % fee in either direction
-    // if (usedPrice.marketprice < 0) {
-    //  return Math.floor(usedPrice.marketprice * 1000 * 0.97)
-    // }
-    // return Math.floor(usedPrice.marketprice * 1000 * 1.03)
+    if (electricitySupplier === 'awattar' && usedPrice.marketprice < 0) {
+      return Math.floor(usedPrice.marketprice * 1000 * 0.97)
+    } else if (electricitySupplier === 'awattar') {
+      return Math.floor(usedPrice.marketprice * 1000 * 1.03)
+    }
+
     // Energie Steiermark adds 1,2 ct/kWh on top of EPEX price
-    return usedPrice.marketprice * 1000 + 1.2)
+    const addedPrice = 1.2 / 100 * 1000 // convert from ct/kWh to €/MWh
+    return (usedPrice.marketprice + addedPrice) * 1000
   }
 
   return { loadForDateIso, loading, loadingFailed, prices, priceForDate }

@@ -146,10 +146,20 @@ const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimatio
 const { feeForDate, feeById } = useElectricityFees()
 const { loading: loadingPrices, loadingFailed,  priceForDate, loadForDateIso } = useElectricityPrices()
 
+const electricitySupplier = computed(() => {
+  if (
+    typeof route.params.electricitySupplier === 'string'
+    && route.params.electricitySupplier.length > 0
+  ) {
+    return route.params.electricitySupplier
+  }
+  return undefined
+})
+
 const minDate = ref(DateTime.fromISO('2023-01-01').setZone('Europe/Vienna').startOf('day'))
 const maxDate = computed(() => {
   const dateTomorrow = DateTime.now().setZone('Europe/Vienna').endOf('day').plus({ days: 1 })
-  if (priceForDate(dateTomorrow) === 0) {
+  if (priceForDate(dateTomorrow, electricitySupplier.value) === 0) {
     return DateTime.now().setZone('Europe/Vienna').endOf('day')
   }
   return dateTomorrow
@@ -210,21 +220,25 @@ const width = computed(() => Math.max(800, Math.min(1800, clientWidth.value - ma
 const height = computed(() => clientHeight.value - 70 - margins.value.top - margins.value.bottom)
 
 const excludeFees = computed(() => {
-  if (typeof route.query.excludeFees !== 'string') {
-    return []
+  let excludeFeesLocal: string[] = []
+  if (typeof route.query.excludeFees === 'string') {
+    excludeFeesLocal = route.query.excludeFees.split(',')
   }
-  return route.query.excludeFees.split(',')
+  if (electricitySupplier.value != null) {
+    excludeFeesLocal.push('infrastructureFee')
+  }
+  return excludeFeesLocal
 })
 
 const negativeBars = computed(() => 
   [...new Array(24).keys()]
     .filter((value) => {
       const usedDate = currentDate.value.set({ hour: value })
-      return priceForDate(usedDate) < 0
+      return priceForDate(usedDate, electricitySupplier.value) < 0
     })
     .map((value) => {
       const usedDate = currentDate.value.set({ hour: value })
-      const power = priceForDate(usedDate)
+      const power = priceForDate(usedDate, electricitySupplier.value)
       const group = `${String(value).padStart(2, '0')}:00`
       return {
         key: `negative_price_${group}`,
@@ -238,7 +252,7 @@ const data = computed<Record<string, string | number>[]>(() => [...new Array(24)
   const usedDate = currentDate.value.set({ hour: value })
   const values: Record<string, number> = {}
 
-  const power = priceForDate(usedDate)
+  const power = priceForDate(usedDate, electricitySupplier.value)
   values.power = Math.max(power, 0)
   Object.keys(feeById).forEach((feeId) => {
     if (excludeFees.value.includes(feeId)) {

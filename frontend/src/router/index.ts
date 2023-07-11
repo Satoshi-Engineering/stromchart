@@ -15,7 +15,7 @@ const router = createRouter({
       path: `/:lang(${Object.keys(LOCALES).join('|')})?`,
       children: [
         {
-          path: ':',
+          path: ':electricitySupplier?',
           name: 'home',
           component: PageIndex,
         },
