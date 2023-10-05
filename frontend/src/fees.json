@@ -11,7 +11,7 @@
   "label": "Elektrizitätsabgabe",
   "color": "#9AC2C9",
   "values": [{
-    "validUntil": 1688162400,
+    "validUntil": 1704063600,
     "amount": 1000
   }, {
     "validUntil": null,
