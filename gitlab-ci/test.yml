@@ -1,0 +1,14 @@
+test:
+  stage: test
+  rules:
+    - !reference [.shared_config, rules, web_and_push]
+    - when: always
+  cache:
+    - !reference [.shared_config, cache, node_modules_root]
+    - !reference [.shared_config, cache, node_modules_backend]
+    - !reference [.shared_config, cache, node_modules_frontend]
+  script:
+    - npm audit
+    - npm run test-units
+    - cd frontend && npm audit && npm run lint && npm run typecheck && cd ..
+    - cd backend && npm audit && npm run typecheck && cd ..
