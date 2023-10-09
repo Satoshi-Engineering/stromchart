@@ -136,10 +136,12 @@ import useBreakpoints from '@/modules/useBreakpoints'
 import useDelayedLoadingAnimation from '@/modules/useDelayedLoadingAnimation'
 import useElectricityFees from '@/modules/useElectricityFees'
 import useElectricityPrices from '@/modules/useElectricityPrices'
+import useDebugInfo from '@/modules/useDebugInfo'
 import { ELECTRICITY_PRICE_COLOR, ELECTRICITY_TAX_COLOR } from '@/constants'
 
 const route = useRoute()
 const { t } = useI18n()
+const { info } = useDebugInfo()
 
 const { width: clientWidth, height: clientHeight, type } = useBreakpoints()
 const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimation(500, true)
@@ -252,13 +254,18 @@ const data = computed<Record<string, string | number>[]>(() => [...new Array(24)
   const usedDate = currentDate.value.set({ hour: value })
   const values: Record<string, number> = {}
 
+  info('\n\n\n')
+  info(`Calculating value for: ${usedDate.toISOTime()}`)
+
   const power = priceForDate(usedDate, electricitySupplier.value)
+  info(`power: ${power}`)
   values.power = Math.max(power, 0)
   Object.keys(feeById).forEach((feeId) => {
     if (excludeFees.value.includes(feeId)) {
       return
     }
     values[feeId] = feeForDate(feeId, usedDate)
+    info(`${feeId}: ${values[feeId]}`)
   })
   if (power < 0) {
     let powerSubtracted = 0
@@ -273,11 +280,14 @@ const data = computed<Record<string, string | number>[]>(() => [...new Array(24)
     values.power = power + powerSubtracted
   }
 
+  info(`total: ${Object.values(values).reduce((total, current) => total + current, 0)}`)
   const salesTax = Math.floor(Object.values(values).reduce((total, current) => total + current, 0) * 0.2)
+  info(`salesTax: ${salesTax}`)
   const valuesInCents = Object.entries({ ...values, salesTax }).reduce((accumulator, [key, value]) => ({
     ...accumulator,
-    [key]: Math.floor(value / 100) / 100,
+    [key]: value / 10000,
   }), {})
+  info(`valuesInCents: ${JSON.stringify(valuesInCents, undefined, '  ')}`)
 
   return {
     group: `${String(value).padStart(2, '0')}:00`,
