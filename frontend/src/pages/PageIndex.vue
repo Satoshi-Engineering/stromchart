@@ -90,7 +90,7 @@
               fill="currentColor"
               :y="y(Math.max(bar.value, 0)) - 5"
               :x="(x(bar.group) || -5000) + x.bandwidth() / 2"
-            >{{ formatNumber(bar.value, 2) }}</text>
+            >{{ formatNumber(bar.value, 2, 2) }}</text>
           </g>
         </g>
       </svg>
