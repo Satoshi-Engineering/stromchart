@@ -18,5 +18,5 @@
 * Open this [typescript file](https://gitlab.satoshiengineering.com/satoshiengineering/stromchart/-/blob/develop/frontend/src/constants.ts)
 * Click on "edit"
 * Update the colors for ELECTRICITY_PRICE_COLOR and ELECTRICITY_TAX_COLOR
-* Click on "Comnmit changes"
+* Click on "Commit changes"
 * Wait 10 minutes for the changes to be deployed

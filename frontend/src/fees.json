@@ -4,7 +4,7 @@
   "color": "#B9D8C2",
   "values": [{
     "validUntil": null,
-    "amount": 40000
+    "amount": 4
   }]
 }, {
   "id": "electricityFee",
@@ -12,10 +12,10 @@
   "color": "#9AC2C9",
   "values": [{
     "validUntil": 1704063600,
-    "amount": 1000
+    "amount": 0.1
   }, {
     "validUntil": null,
-    "amount": 15000
+    "amount": 1.5
   }]
 }, {
   "id": "gridFee",
@@ -25,13 +25,13 @@
     "validUntil": null,
     "amount": [{
       "validUntil": 21600,
-      "value": 34400
+      "value": 3.44
     }, {
       "validUntil": 79200,
-      "value": 68900
+      "value": 6.89
     }, {
       "validUntil": 86400,
-      "value": 34400
+      "value": 3.44
     }]
   }]
 }, {
@@ -40,9 +40,9 @@
   "color": "#4A5043",
   "values": [{
     "validUntil": 1677625200,
-    "amount": 23280
+    "amount": 2.328
   }, {
     "validUntil": null,
-    "amount": 3870
+    "amount": 0.387
   }]
 }]

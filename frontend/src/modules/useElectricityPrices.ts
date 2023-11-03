@@ -1,23 +1,32 @@
 import axios from 'axios'
-import type { DateTime } from 'luxon'
+import { DateTime } from 'luxon'
 import { ref, reactive } from 'vue'
 
 import { BACKEND_API_ORIGIN } from '@/constants'
 
+export type CtPerKWh = number
+export type EurPerMWh = number
+export type ApiMarketprice = {
+  start_timestamp: number,
+  end_timestamp: number,
+  marketprice: EurPerMWh,
+  unit: 'Eur/Mwh',
+}
+
 export default function useElectricityPrices() {
   const loading = ref<string[]>([])
   const loadingFailed = ref<string[]>([])
-  const prices = reactive<Record<string, any[]>>({})
+  const marketpricesByDate = reactive<Record<string, ApiMarketprice[]>>({})
 
   const loadForDateIso = async (dateIso: string) => {
-    if (prices[dateIso] != null || loading.value.includes(dateIso)) {
+    if (marketpricesByDate[dateIso] != null || loading.value.includes(dateIso)) {
       return
     }
     loading.value = [...loading.value, dateIso]
     loadingFailed.value = loadingFailed.value.filter((currentDateIso) => currentDateIso !== dateIso)
     try {
       const { data } = await axios.get(`${BACKEND_API_ORIGIN}/api/prices?dateIso=${dateIso}`)
-      prices[dateIso] = data.data
+      marketpricesByDate[dateIso] = data.data
     } catch (error) {
       console.error(error)
       loadingFailed.value = [...loadingFailed.value, dateIso]
@@ -26,12 +35,12 @@ export default function useElectricityPrices() {
     }
   }
 
-  const priceForDate = (date: DateTime, electricitySupplier = 'EnergieSteiermark'): number => {
+  const priceForDate = (date: DateTime, electricitySupplier = 'EnergieSteiermark'): CtPerKWh => {
     const dateIso = date.toISODate()
-    if (dateIso == null || prices[dateIso] == null) {
+    if (dateIso == null || marketpricesByDate[dateIso] == null) {
       return 0
     }
-    const usedPrice = prices[dateIso].find(
+    const usedPrice = marketpricesByDate[dateIso].find(
       ({ start_timestamp, end_timestamp }: { start_timestamp: number, end_timestamp: number }) => (
         date.toMillis() >= start_timestamp
         && date.toMillis() < end_timestamp
@@ -40,17 +49,38 @@ export default function useElectricityPrices() {
     if (usedPrice == null) {
       return 0
     }
-    // awattar takes 3 % fee in either direction
-    if (electricitySupplier === 'awattar' && usedPrice.marketprice < 0) {
-      return Math.floor(usedPrice.marketprice * 1000 * 0.97)
-    } else if (electricitySupplier === 'awattar') {
-      return Math.floor(usedPrice.marketprice * 1000 * 1.03)
-    }
-
-    // Energie Steiermark adds 1,2 ct/kWh on top of EPEX price
-    const addedPrice = 1.2 / 100 * 1000 // convert from ct/kWh to €/MWh
-    return (usedPrice.marketprice + addedPrice) * 1000
+    return addSupplierFee(usedPrice.marketprice / 10, electricitySupplier)
   }
 
-  return { loadForDateIso, loading, loadingFailed, prices, priceForDate }
+  const priceForTimestamp = (timestamp: number, electricitySupplier = 'EnergieSteiermark'): CtPerKWh => {
+    const date = DateTime.fromMillis(timestamp)
+    const dateIso = date.toISODate()
+    if (dateIso == null || marketpricesByDate[dateIso] == null) {
+      return 0
+    }
+    const usedPrice = marketpricesByDate[dateIso].find(
+      ({ start_timestamp, end_timestamp }: { start_timestamp: number, end_timestamp: number }) => (
+        timestamp >= start_timestamp
+        && timestamp < end_timestamp
+      ),
+    )
+    if (usedPrice == null) {
+      return 0
+    }
+    return addSupplierFee(usedPrice.marketprice / 10, electricitySupplier)
+  }
+
+  const addSupplierFee = (price: CtPerKWh, electricitySupplier = 'EnergieSteiermark'): CtPerKWh => {
+    // awattar takes 3 % fee in either direction
+    if (electricitySupplier === 'awattar' && price < 0) {
+      return price * 0.97
+    } else if (electricitySupplier === 'awattar') {
+      return price * 1.03
+    }
+
+    // Energie Steiermark adds 1,2 ct/kWh (i.e. 12 €/Mwh) on top of EPEX price
+    return price + 1.2
+  }
+
+  return { loadForDateIso, loading, loadingFailed, priceForDate, priceForTimestamp }
 }

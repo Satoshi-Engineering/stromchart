@@ -98,22 +98,29 @@
 
     <div
       v-if="showInfo"
-      class="fixed right-0 top-0 mt-2 mr-2 max-w-sm py-2 pl-4 pr-8 bg-white border border-gray-200 rounded shadow"
+      class="
+        fixed right-0 top-0 mt-2 mr-2 max-w-sm
+        grid grid-cols-[auto_auto] gap-2 items-center
+        border border-gray-200 rounded
+        py-2 pl-4 pr-8
+        bg-white shadow
+      "
       @click="showInfo = false"
     >
       <button class="absolute right-0 top-0 py-2 px-3">
         X
       </button>
-      <div
-        v-for="info in infos"
-        :key="info.id"
-        class="whitespace-nowrap"
-      >
+      <template v-for="feeInfo in infos" :key="feeInfo.id">
         <span
-          class="inline-block h-3 w-3 mr-2 border border-gray-200 rounded"
-          :style="{ backgroundColor: info.color }"
-        /> {{ info.label }}
-      </div>
+          class="inline-block h-3 w-3 border border-gray-200 rounded"
+          :style="{ backgroundColor: feeInfo.color }"
+        />
+        <span class="whitespace-nowrap">{{ feeInfo.label }}</span>
+      </template>
+      <template v-if="currentDateHasTimezoneShift">
+        <span>SZ</span><span>Sommerzeit</span>
+        <span>NZ</span><span>Normalzeit</span>
+      </template>
     </div>
   </div>
 </template>
@@ -146,7 +153,10 @@ const { info } = useDebugInfo()
 const { width: clientWidth, height: clientHeight, type } = useBreakpoints()
 const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimation(500, true)
 const { feeForDate, feeById } = useElectricityFees()
-const { loading: loadingPrices, loadingFailed,  priceForDate, loadForDateIso } = useElectricityPrices()
+const {
+  loadForDateIso, loading: loadingPrices, loadingFailed,
+  priceForDate, priceForTimestamp,
+} = useElectricityPrices()
 
 const electricitySupplier = computed(() => {
   if (
@@ -233,15 +243,11 @@ const excludeFees = computed(() => {
 })
 
 const negativeBars = computed(() => 
-  [...new Array(24).keys()]
-    .filter((value) => {
-      const usedDate = currentDate.value.set({ hour: value })
-      return priceForDate(usedDate, electricitySupplier.value) < 0
-    })
-    .map((value) => {
-      const usedDate = currentDate.value.set({ hour: value })
-      const power = priceForDate(usedDate, electricitySupplier.value)
-      const group = `${String(value).padStart(2, '0')}:00`
+  hourlyTimestampsForCurrentDate.value
+    .filter((timestamp) => priceForTimestamp(timestamp, electricitySupplier.value) < 0)
+    .map((timestamp) => {
+      const power = priceForTimestamp(timestamp, electricitySupplier.value)
+      const group = labelForTimestamp(timestamp)
       return {
         key: `negative_price_${group}`,
         group,
@@ -250,22 +256,42 @@ const negativeBars = computed(() =>
     }),
 )
 
-const data = computed<Record<string, string | number>[]>(() => [...new Array(24).keys()].map((value) => {
-  const usedDate = currentDate.value.set({ hour: value })
+const hourlyTimestampsForCurrentDate = computed(() => {
+  const timestamps = []
+  const first = currentDate.value.toMillis()
+  const last = currentDate.value.set({ hour: 23 }).toMillis()
+  for (let current = first; current <= last; current += 1000 * 60 * 60) {
+    timestamps.push(current)
+  }
+  return timestamps
+})
+
+const currentDateHasTimezoneShift = computed(() => hourlyTimestampsForCurrentDate.value.length !== 24)
+
+const labelForTimestamp = (timestamp: number) => {
+  const date = DateTime.fromMillis(timestamp)
+  const timeFormatted = [date.toLocaleString(DateTime.TIME_24_SIMPLE)]
+  if (currentDateHasTimezoneShift.value) {
+    const timezoneLabel = date.toFormat('ZZZZZ') === 'Central European Summer Time' ? 'SZ' : 'NZ'
+    timeFormatted.push(timezoneLabel)
+  }
+  return timeFormatted.join(' ')
+}
+
+const data = computed<Record<string, string | number>[]>(() => hourlyTimestampsForCurrentDate.value.map((timestamp) => {
+  const usedDate = DateTime.fromMillis(timestamp)
   const values: Record<string, number> = {}
 
   info('\n\n\n')
-  info(`Calculating value for: ${usedDate.toISOTime()}`)
+  info(`Calculating values for: ${usedDate.toISOTime()}`)
 
-  const power = priceForDate(usedDate, electricitySupplier.value)
-  info(`power: ${power}`)
+  const power = priceForTimestamp(timestamp, electricitySupplier.value)
   values.power = Math.max(power, 0)
   Object.keys(feeById).forEach((feeId) => {
     if (excludeFees.value.includes(feeId)) {
       return
     }
     values[feeId] = feeForDate(feeId, usedDate)
-    info(`${feeId}: ${values[feeId]}`)
   })
   if (power < 0) {
     let powerSubtracted = 0
@@ -279,19 +305,15 @@ const data = computed<Record<string, string | number>[]>(() => [...new Array(24)
     })
     values.power = power + powerSubtracted
   }
+  values.salesTax = Object.values(values).reduce((total, current) => total + current, 0) * 0.2
 
+  info('values in Ct/KWh')
+  info(JSON.stringify(values, undefined, '  '))
   info(`total: ${Object.values(values).reduce((total, current) => total + current, 0)}`)
-  const salesTax = Math.floor(Object.values(values).reduce((total, current) => total + current, 0) * 0.2)
-  info(`salesTax: ${salesTax}`)
-  const valuesInCents = Object.entries({ ...values, salesTax }).reduce((accumulator, [key, value]) => ({
-    ...accumulator,
-    [key]: value / 10000,
-  }), {})
-  info(`valuesInCents: ${JSON.stringify(valuesInCents, undefined, '  ')}`)
 
   return {
-    group: `${String(value).padStart(2, '0')}:00`,
-    ...valuesInCents,
+    group: labelForTimestamp(timestamp),
+    ...values,
   }
 }))
 const subgroups = computed(() => Object.keys(data.value[0]).filter((subgroup) => subgroup !== 'group'))
