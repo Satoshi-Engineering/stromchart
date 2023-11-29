@@ -168,11 +168,11 @@ const electricitySupplier = computed(() => {
   return undefined
 })
 
-const minDate = ref(DateTime.fromISO('2023-01-01').setZone('Europe/Vienna').startOf('day'))
+const minDate = ref(DateTime.fromISO('2023-01-01').startOf('day'))
 const maxDate = computed(() => {
-  const dateTomorrow = DateTime.now().setZone('Europe/Vienna').endOf('day').plus({ days: 1 })
+  const dateTomorrow = DateTime.now().endOf('day').plus({ days: 1 })
   if (priceForDate(dateTomorrow, electricitySupplier.value) === 0) {
-    return DateTime.now().setZone('Europe/Vienna').endOf('day')
+    return DateTime.now().endOf('day')
   }
   return dateTomorrow
 })

@@ -23,7 +23,7 @@ export const getForDateIso = async (dateIso: string): Promise<unknown> => {
     throw error
   }
   try {
-    const targetDate = DateTime.fromISO(dateIso).setZone('Europe/Vienna').startOf('day')
+    const targetDate = DateTime.fromISO(dateIso).startOf('day')
     const start = targetDate.toMillis()
     const end = targetDate.plus({ days: 1 }).toMillis()
     const { data } = await axios.get(`https://api.awattar.at/v1/marketdata?start=${start}&end=${end}`)

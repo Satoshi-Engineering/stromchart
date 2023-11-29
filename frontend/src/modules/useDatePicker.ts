@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { computed, ref, type Ref, type ComputedRef } from 'vue'
 
 export default (minDate: Ref<DateTime> | ComputedRef<DateTime>, maxDate: Ref<DateTime> | ComputedRef<DateTime>) => {
-  const currentDate = ref(DateTime.now().setZone('Europe/Vienna').startOf('day'))
+  const currentDate = ref(DateTime.now().startOf('day'))
   const currentDateIso = computed(() => currentDate.value.toISODate())
   const currentDateFormatted = computed(() => currentDate.value.setLocale('de').toLocaleString(DateTime.DATE_MED))
 
@@ -11,7 +11,7 @@ export default (minDate: Ref<DateTime> | ComputedRef<DateTime>, maxDate: Ref<Dat
       return
     }
     const { value } = (event.target as HTMLInputElement)
-    setDate(DateTime.fromISO(value).setZone('Europe/Vienna').startOf('day'))
+    setDate(DateTime.fromISO(value).startOf('day'))
   }
   
   const selectPrevDate = () => {
