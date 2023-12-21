@@ -251,7 +251,7 @@ const negativeBars = computed(() =>
       return {
         key: `negative_price_${group}`,
         group,
-        power: Math.floor(power / 100) / 100,
+        power: power / 10, // scale down the negative bars to make the diagram prettier
       }
     }),
 )
