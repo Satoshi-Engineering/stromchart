@@ -22,7 +22,7 @@
   "label": "Netznutzungsentgelt",
   "color": "#8AA1B1",
   "values": [{
-    "validUntil": null,
+    "validUntil": 1704063600,
     "amount": [{
       "validUntil": 21600,
       "value": 3.44
@@ -33,6 +33,18 @@
       "validUntil": 86400,
       "value": 3.44
     }]
+  },  {
+    "validUntil": null,
+    "amount": [{
+      "validUntil": 21600,
+      "value": 3.73
+    }, {
+      "validUntil": 79200,
+      "value": 7.47
+    }, {
+      "validUntil": 86400,
+      "value": 3.73
+    }]
   }]
 }, {
   "id": "gridLoss",
@@ -42,7 +54,10 @@
     "validUntil": 1677625200,
     "amount": 2.328
   }, {
-    "validUntil": null,
+    "validUntil": 1704063600,
     "amount": 0.387
+  }, {
+    "validUntil": null,
+    "amount": 0.793
   }]
 }]
