@@ -66,6 +66,10 @@
                 'bg-red-200': price.pricePrev > 10 && price.pricePrev <= 15,
                 'bg-red-500': price.pricePrev > 15 && price.pricePrev <= 25,
                 'bg-red-800': price.pricePrev > 25,
+                'border-4': currentDate.minus({ days: 1 }).toISODate() === DateTime.now().toISODate()
+                  && DateTime.now().toFormat('H') === String(price.hour),
+                'font-bold': currentDate.minus({ days: 1 }).toISODate() === DateTime.now().toISODate()
+                  && DateTime.now().toFormat('H') === String(price.hour),
               }"
             >
               {{ price.pricePrev.toFixed(2) }}
@@ -81,6 +85,10 @@
                 'bg-red-200': price.price > 10 && price.price <= 15,
                 'bg-red-500': price.price > 15 && price.price <= 25,
                 'bg-red-800': price.price > 25,
+                'border-4': currentDate.toISODate() === DateTime.now().toISODate()
+                  && DateTime.now().toFormat('H') === String(price.hour),
+                'font-bold': currentDate.toISODate() === DateTime.now().toISODate()
+                  && DateTime.now().toFormat('H') === String(price.hour),
               }"
             >
               {{ price.price.toFixed(2) }}
@@ -97,6 +105,10 @@
                   'bg-red-200': price.priceNext > 10 && price.priceNext <= 15,
                   'bg-red-500': price.priceNext > 15 && price.priceNext <= 25,
                   'bg-red-800': price.priceNext > 25,
+                  'border-4': currentDate.plus({ days: 1 }).toISODate() === DateTime.now().toISODate()
+                    && DateTime.now().toFormat('H') === String(price.hour),
+                  'font-bold': currentDate.plus({ days: 1 }).toISODate() === DateTime.now().toISODate()
+                    && DateTime.now().toFormat('H') === String(price.hour),
                 }"
               >
                 {{ price.priceNext.toFixed(2) }}
