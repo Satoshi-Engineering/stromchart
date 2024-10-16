@@ -71,6 +71,11 @@ export default function useElectricityPrices() {
   }
 
   const addSupplierFee = (price: CtPerKWh, electricitySupplier = 'EnergieSteiermark'): CtPerKWh => {
+    // EPEX price is the base price
+    if (electricitySupplier === 'EPEX') {
+      return price
+    }
+
     // awattar takes 3 % fee in either direction
     if (electricitySupplier === 'awattar' && price < 0) {
       return price * 0.97

@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { LOCALES } from '@/modules/initI18n'
 
 const PageIndex = () => import('@/pages/PageIndex.vue')
+const PageTable = () => import('@/pages/PageTable.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +15,11 @@ const router = createRouter({
     {
       path: `/:lang(${Object.keys(LOCALES).join('|')})?`,
       children: [
+        {
+          path: 'table',
+          name: 'table',
+          component: PageTable,
+        },
         {
           path: ':electricitySupplier?',
           name: 'home',
