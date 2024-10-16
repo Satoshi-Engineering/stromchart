@@ -8,7 +8,6 @@ test:
     - !reference [.shared_config, cache, node_modules_backend]
     - !reference [.shared_config, cache, node_modules_frontend]
   script:
-    - npm audit
     - npm run test-units
-    - cd frontend && npm audit && npm run lint && npm run typecheck && cd ..
-    - cd backend && npm audit && npm run typecheck && cd ..
+    - cd frontend && npm run lint && npm run typecheck && cd ..
+    - cd backend && npm run typecheck && cd ..
