@@ -15,7 +15,7 @@
         w-full max-w-lg mx-auto
         h-screen min-h-[550px] max-h-[800px]
         py-1 pr-2
-        grid grid-cols-[40px_1fr_1fr_1fr] gap-0.5 text-xs
+        grid grid-cols-[40px_1fr_1fr_1fr] gap-0.5 text-sm
       "
     >
       <div />
@@ -38,12 +38,12 @@
         <div
           class="flex items-center justify-center rounded-md text-center"
           :class="{
-            'bg-green-500': price.pricePrev <= 0,
-            'bg-green-200': price.pricePrev > 0 && price.pricePrev <= 5,
-            'bg-yellow-200': price.pricePrev > 5 && price.pricePrev <= 10,
-            'bg-red-200': price.pricePrev > 10 && price.pricePrev <= 15,
-            'bg-red-500': price.pricePrev > 15 && price.pricePrev <= 25,
-            'bg-red-800': price.pricePrev > 25,
+            'bg-green-400': price.pricePrev <= -5,
+            'bg-green-200': price.pricePrev > -5 && price.pricePrev <= 5,
+            'bg-yellow-100': price.pricePrev > 5 && price.pricePrev <= 10,
+            'bg-orange-200': price.pricePrev > 10 && price.pricePrev <= 15,
+            'bg-red-300': price.pricePrev > 15 && price.pricePrev <= 25,
+            'bg-red-500': price.pricePrev > 25,
             'border-4': currentDate.minus({ days: 1 }).toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour),
             'font-bold': currentDate.minus({ days: 1 }).toISODate() === DateTime.now().toISODate()
@@ -55,13 +55,13 @@
         <div
           class="flex items-center justify-center rounded-md text-center"
           :class="{
-            'bg-green-500': price.price <= 0,
-            'bg-green-200': price.price > 0 && price.price <= 5,
-            'bg-yellow-200': price.price > 5 && price.price <= 10,
-            'bg-red-200': price.price > 10 && price.price <= 15,
-            'bg-red-500': price.price > 15 && price.price <= 25,
-            'bg-red-800': price.price > 25,
-            'border font-bold': currentDate.toISODate() === DateTime.now().toISODate()
+            'bg-green-400': price.price <= -5,
+            'bg-green-200': price.price > -5 && price.price <= 5,
+            'bg-yellow-100': price.price > 5 && price.price <= 10,
+            'bg-orange-200': price.price > 10 && price.price <= 15,
+            'bg-red-300': price.price > 15 && price.price <= 25,
+            'bg-red-500': price.price > 25,
+            'border-2 font-bold': currentDate.toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour),
           }"
         >
@@ -71,12 +71,12 @@
           v-if="currentDate.plus({ days: 1 }) <= maxDate"
           class="flex items-center justify-center rounded-md text-center"
           :class="{
-            'bg-green-500': price.priceNext <= 0,
-            'bg-green-200': price.priceNext > 0 && price.priceNext <= 5,
-            'bg-yellow-200': price.priceNext > 5 && price.priceNext <= 10,
-            'bg-red-200': price.priceNext > 10 && price.priceNext <= 15,
-            'bg-red-500': price.priceNext > 15 && price.priceNext <= 25,
-            'bg-red-800': price.priceNext > 25,
+            'bg-green-400': price.priceNext <= -5,
+            'bg-green-200': price.priceNext > -5 && price.priceNext <= 5,
+            'bg-yellow-100': price.priceNext > 5 && price.priceNext <= 10,
+            'bg-orange-200': price.priceNext > 10 && price.priceNext <= 15,
+            'bg-red-300': price.priceNext > 15 && price.priceNext <= 25,
+            'bg-red-500': price.priceNext > 25,
             'border-4': currentDate.plus({ days: 1 }).toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour),
             'font-bold': currentDate.plus({ days: 1 }).toISODate() === DateTime.now().toISODate()
