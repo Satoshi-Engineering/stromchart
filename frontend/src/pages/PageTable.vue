@@ -119,7 +119,7 @@
 
 <script setup lang="ts">
 import { DateTime } from 'luxon'
-import { computed, watchEffect, ref } from 'vue'
+import { computed, watchEffect, ref, onBeforeMount, onBeforeUnmount } from 'vue'
 
 import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
 import useDatePicker from '@/modules/useDatePicker'
@@ -181,5 +181,24 @@ const prices = computed(() => {
     })
   }
   return prices
+})
+
+/////
+// reload data after one hour
+const currentHour = DateTime.now().toFormat('yyyy-LL-dd HH')
+const reconnectOnVisibilityChange = () => {
+  if (
+    document.visibilityState !== 'visible'
+    || DateTime.now().toFormat('yyyy-LL-dd HH') === currentHour
+  ) {
+    return
+  }
+  location.reload()
+}
+onBeforeMount(() => {
+  document.addEventListener('visibilitychange', reconnectOnVisibilityChange)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', reconnectOnVisibilityChange)
 })
 </script>
