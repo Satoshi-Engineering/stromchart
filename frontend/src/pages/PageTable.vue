@@ -11,27 +11,32 @@
     </div>
     <div
       v-else-if="showContent"
-      class="w-full max-w-lg mx-auto pt-1 pr-2 grid grid-cols-[40px_1fr_1fr_1fr] gap-0.5 text-xs"
+      class="
+        w-full max-w-lg mx-auto
+        h-screen min-h-[550px] max-h-[800px]
+        py-1 pr-2
+        grid grid-cols-[40px_1fr_1fr_1fr] gap-0.5 text-xs
+      "
     >
       <div />
-      <div class="py-0.5 px-3 text-center font-bold">
+      <div class="flex items-center justify-center font-bold">
         {{ currentDate.minus({ days: 1 }).toFormat('dd. LL.') }}
       </div>
-      <div class="py-0.5 px-3 text-center font-bold">
+      <div class="flex items-center justify-center font-bold">
         {{ currentDate.toFormat('dd. LL.') }}
       </div>
-      <div class="py-0.5 px-3 text-center font-bold">
+      <div class="flex items-center justify-center font-bold">
         {{ currentDate.plus({ days: 1 }).toFormat('dd. LL.') }}
       </div>
       <template
         v-for="(price, index) in prices"
         :key="index"
       >
-        <div class="py-0.5 px-3 text-right">
+        <div class="flex items-center justify-end pr-3 text-right">
           {{ String(price.hour).padStart(2, '0') }}
         </div>
         <div
-          class="py-0.5 px-3 rounded-md text-center"
+          class="flex items-center justify-center rounded-md text-center"
           :class="{
             'bg-green-500': price.pricePrev <= 0,
             'bg-green-200': price.pricePrev > 0 && price.pricePrev <= 5,
@@ -48,7 +53,7 @@
           {{ price.pricePrev.toFixed(2) }}
         </div>
         <div
-          class="py-0.5 px-3 rounded-md text-center"
+          class="flex items-center justify-center rounded-md text-center"
           :class="{
             'bg-green-500': price.price <= 0,
             'bg-green-200': price.price > 0 && price.price <= 5,
@@ -64,7 +69,7 @@
         </div>
         <div
           v-if="currentDate.plus({ days: 1 }) <= maxDate"
-          class="py-0.5 px-3 rounded-md text-center"
+          class="flex items-center justify-center rounded-md text-center"
           :class="{
             'bg-green-500': price.priceNext <= 0,
             'bg-green-200': price.priceNext > 0 && price.priceNext <= 5,
