@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { LOCALES } from '@/modules/initI18n'
 
 const PageIndex = () => import('@/pages/PageIndex.vue')
-const PageTable = () => import('@/pages/PageTable.vue')
+const PageTable = () => import('@/pages/table/PageTable.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

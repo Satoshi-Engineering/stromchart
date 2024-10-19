@@ -18,16 +18,16 @@
         grid grid-cols-[40px_1fr_1fr_1fr] gap-0.5 text-sm
       "
     >
-      <div />
-      <div class="flex items-center justify-center font-bold">
+      <HeaderItem />
+      <HeaderItem>
         {{ currentDate.minus({ days: 1 }).toFormat('dd. LL.') }}
-      </div>
-      <div class="flex items-center justify-center font-bold">
+      </HeaderItem>
+      <HeaderItem>
         {{ currentDate.toFormat('dd. LL.') }}
-      </div>
-      <div class="flex items-center justify-center font-bold">
+      </HeaderItem>
+      <HeaderItem>
         {{ currentDate.plus({ days: 1 }).toFormat('dd. LL.') }}
-      </div>
+      </HeaderItem>
       <template
         v-for="(price, index) in prices"
         :key="index"
@@ -35,56 +35,34 @@
         <div class="flex items-center justify-end pr-3 text-right">
           {{ String(price.hour).padStart(2, '0') }}
         </div>
-        <div
-          class="flex items-center justify-center rounded-md text-center"
-          :class="{
-            'bg-green-400': price.pricePrev <= -5,
-            'bg-green-200': price.pricePrev > -5 && price.pricePrev <= 5,
-            'bg-yellow-100': price.pricePrev > 5 && price.pricePrev <= 10,
-            'bg-orange-200': price.pricePrev > 10 && price.pricePrev <= 15,
-            'bg-red-300': price.pricePrev > 15 && price.pricePrev <= 25,
-            'bg-red-500': price.pricePrev > 25,
-            'border-4': currentDate.minus({ days: 1 }).toISODate() === DateTime.now().toISODate()
-              && DateTime.now().toFormat('H') === String(price.hour),
-            'font-bold': currentDate.minus({ days: 1 }).toISODate() === DateTime.now().toISODate()
-              && DateTime.now().toFormat('H') === String(price.hour),
-          }"
+        <PriceItem
+          :price="price.pricePrev"
+          :is-current-hour="
+            currentDate.minus({ days: 1 }).toISODate() === DateTime.now().toISODate()
+              && DateTime.now().toFormat('H') === String(price.hour)
+          "
         >
           {{ price.pricePrev.toFixed(2) }}
-        </div>
-        <div
-          class="flex items-center justify-center rounded-md text-center"
-          :class="{
-            'bg-green-400': price.price <= -5,
-            'bg-green-200': price.price > -5 && price.price <= 5,
-            'bg-yellow-100': price.price > 5 && price.price <= 10,
-            'bg-orange-200': price.price > 10 && price.price <= 15,
-            'bg-red-300': price.price > 15 && price.price <= 25,
-            'bg-red-500': price.price > 25,
-            'border-2 font-bold': currentDate.toISODate() === DateTime.now().toISODate()
-              && DateTime.now().toFormat('H') === String(price.hour),
-          }"
+        </PriceItem>
+        <PriceItem
+          :price="price.price"
+          :is-current-hour="
+            currentDate.toISODate() === DateTime.now().toISODate()
+              && DateTime.now().toFormat('H') === String(price.hour)
+          "
         >
           {{ price.price.toFixed(2) }}
-        </div>
-        <div
+        </PriceItem>
+        <PriceItem
           v-if="currentDate.plus({ days: 1 }) <= maxDate"
-          class="flex items-center justify-center rounded-md text-center"
-          :class="{
-            'bg-green-400': price.priceNext <= -5,
-            'bg-green-200': price.priceNext > -5 && price.priceNext <= 5,
-            'bg-yellow-100': price.priceNext > 5 && price.priceNext <= 10,
-            'bg-orange-200': price.priceNext > 10 && price.priceNext <= 15,
-            'bg-red-300': price.priceNext > 15 && price.priceNext <= 25,
-            'bg-red-500': price.priceNext > 25,
-            'border-4': currentDate.plus({ days: 1 }).toISODate() === DateTime.now().toISODate()
-              && DateTime.now().toFormat('H') === String(price.hour),
-            'font-bold': currentDate.plus({ days: 1 }).toISODate() === DateTime.now().toISODate()
-              && DateTime.now().toFormat('H') === String(price.hour),
-          }"
+          :price="price.priceNext"
+          :is-current-hour="
+            currentDate.plus({ days: 1 }).toISODate() === DateTime.now().toISODate()
+              && DateTime.now().toFormat('H') === String(price.hour)
+          "
         >
           {{ price.priceNext.toFixed(2) }}
-        </div>
+        </PriceItem>
         <div v-else />
       </template>
     </div>
@@ -126,6 +104,9 @@ import useDatePicker from '@/modules/useDatePicker'
 import useBreakpoints from '@/modules/useBreakpoints'
 import useDelayedLoadingAnimation from '@/modules/useDelayedLoadingAnimation'
 import useElectricityPrices from '@/modules/useElectricityPrices'
+
+import HeaderItem from './components/HeaderItem.vue'
+import PriceItem from './components/PriceItem.vue'
 
 const { type } = useBreakpoints()
 const { loading, showLoadingAnimation, showContent } = useDelayedLoadingAnimation(500, true)
