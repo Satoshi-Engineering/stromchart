@@ -41,8 +41,11 @@
             currentDate.minus({ days: 1 }).toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour)
           "
-          :add-vat="addVat"
-          :fixed-costs="getFixedCosts()"
+          :threshold-lowest="addFixedCostsAndVat(-8)"
+          :threshold-low="addFixedCostsAndVat(5)"
+          :threshold-mid="addFixedCostsAndVat(10)"
+          :threshold-high="addFixedCostsAndVat(15)"
+          :threshold-highest="addFixedCostsAndVat(25)"
         >
           {{ price.pricePrev.toFixed(2) }}
         </PriceItem>
@@ -52,8 +55,11 @@
             currentDate.toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour)
           "
-          :add-vat="addVat"
-          :fixed-costs="getFixedCosts()"
+          :threshold-lowest="addFixedCostsAndVat(-8)"
+          :threshold-low="addFixedCostsAndVat(5)"
+          :threshold-mid="addFixedCostsAndVat(10)"
+          :threshold-high="addFixedCostsAndVat(15)"
+          :threshold-highest="addFixedCostsAndVat(25)"
         >
           {{ price.price.toFixed(2) }}
         </PriceItem>
@@ -64,8 +70,11 @@
             currentDate.plus({ days: 1 }).toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour)
           "
-          :add-vat="addVat"
-          :fixed-costs="getFixedCosts()"
+          :threshold-lowest="addFixedCostsAndVat(-8)"
+          :threshold-low="addFixedCostsAndVat(5)"
+          :threshold-mid="addFixedCostsAndVat(10)"
+          :threshold-high="addFixedCostsAndVat(15)"
+          :threshold-highest="addFixedCostsAndVat(25)"
         >
           {{ price.priceNext.toFixed(2) }}
         </PriceItem>
