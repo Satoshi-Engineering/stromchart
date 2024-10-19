@@ -11,7 +11,7 @@
       'bg-orange-200': price > 10 && price <= 15,
       'bg-red-300': price > 15 && price <= 25,
       'bg-red-500': price > 25,
-      'border-black font-bold': isCurrentHour,
+      '!border-black font-bold': isCurrentHour,
     }"
   >
     {{ price.toFixed(2) }}
