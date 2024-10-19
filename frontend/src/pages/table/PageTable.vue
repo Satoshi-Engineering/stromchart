@@ -41,6 +41,8 @@
             currentDate.minus({ days: 1 }).toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour)
           "
+          :add-vat="addVat"
+          :fixed-costs="getFixedCosts()"
         >
           {{ price.pricePrev.toFixed(2) }}
         </PriceItem>
@@ -50,6 +52,8 @@
             currentDate.toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour)
           "
+          :add-vat="addVat"
+          :fixed-costs="getFixedCosts()"
         >
           {{ price.price.toFixed(2) }}
         </PriceItem>
@@ -60,6 +64,8 @@
             currentDate.plus({ days: 1 }).toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour)
           "
+          :add-vat="addVat"
+          :fixed-costs="getFixedCosts()"
         >
           {{ price.priceNext.toFixed(2) }}
         </PriceItem>
@@ -229,11 +235,16 @@ watch(fixedCosts, () => {
   history.replaceState(null, '', url.toString())
 })
 
-const addFixedCostsAndVat = (price: number) => {
-  let priceWithFixedCosts = price
+const getFixedCosts = () => {
   if (fixedCosts.value !== '' && !isNaN(Number(fixedCosts.value))) {
-    priceWithFixedCosts += Number(fixedCosts.value)
+   return Number(fixedCosts.value)
   }
+  return 0
+}
+
+const addFixedCostsAndVat = (price: number) => {
+  let priceWithFixedCosts = price + getFixedCosts()
+  
   if (addVat.value) {
     priceWithFixedCosts *= 1.2
   }
