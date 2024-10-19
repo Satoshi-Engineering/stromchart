@@ -36,7 +36,7 @@
           {{ String(price.hour).padStart(2, '0') }}
         </div>
         <PriceItem
-          :price="price.pricePrev"
+          :price="addFixedCostsAndVat(price.pricePrev)"
           :is-current-hour="
             currentDate.minus({ days: 1 }).toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour)
@@ -45,7 +45,7 @@
           {{ price.pricePrev.toFixed(2) }}
         </PriceItem>
         <PriceItem
-          :price="price.price"
+          :price="addFixedCostsAndVat(price.price)"
           :is-current-hour="
             currentDate.toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour)
@@ -55,7 +55,7 @@
         </PriceItem>
         <PriceItem
           v-if="currentDate.plus({ days: 1 }) <= maxDate"
-          :price="price.priceNext"
+          :price="addFixedCostsAndVat(price.priceNext)"
           :is-current-hour="
             currentDate.plus({ days: 1 }).toISODate() === DateTime.now().toISODate()
               && DateTime.now().toFormat('H') === String(price.hour)
@@ -92,12 +92,32 @@
         {{ type === 'xs' ? '>' : $t('components.datepicker.next') }}
       </button>
     </div>
+    <div class="w-full flex flex-col justify-start my-4 px-2">
+      <label class="block">
+        <input
+          type="checkbox"
+          :checked="addVat"
+          @change="addVat = !addVat"
+        >
+        {{ $t('pages.table.addVat') }}
+      </label>
+      <label class="mt-4 flex flex-col">
+        {{ $t('pages.table.fixedCosts') }}
+        <input
+          type="number"
+          class="border py-1 px-2"
+          :value="fixedCosts"
+          @input="updateFixedCosts"
+        >
+      </label>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { DateTime } from 'luxon'
-import { computed, watchEffect, ref, onBeforeMount, onBeforeUnmount } from 'vue'
+import { computed, watchEffect, ref, onBeforeMount, onBeforeUnmount, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
 import AnimatedLoadingWheel from '@/components/AnimatedLoadingWheel.vue'
 import useDatePicker from '@/modules/useDatePicker'
@@ -163,6 +183,62 @@ const prices = computed(() => {
   }
   return prices
 })
+
+/////
+// form elements
+const route = useRoute()
+
+const addVat = ref(false)
+onMounted(() => {
+  if (route.query.vat === 'true') {
+    addVat.value = true
+  }
+})
+watch(addVat, () => {
+  const url = new URL(location.href)
+  if (addVat.value) {
+    url.searchParams.set('vat', 'true')
+  } else {
+    url.searchParams.delete('vat')
+  }
+  history.replaceState(null, '', url.toString())
+})
+
+const fixedCosts = ref<string>('')
+onMounted(() => {
+  const fixedCostsFromUrl = route.query.fixedCosts
+  if (fixedCostsFromUrl != null && !isNaN(Number(fixedCostsFromUrl))) {
+    fixedCosts.value = String(fixedCostsFromUrl)
+  }
+})
+const updateFixedCosts = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (isNaN(Number(target.value))) {
+    fixedCosts.value = ''
+  } else {
+    fixedCosts.value = target.value
+  }
+}
+watch(fixedCosts, () => {
+  const url = new URL(location.href)
+  if (fixedCosts.value === '') {
+    url.searchParams.delete('fixedCosts')
+  } else {
+    url.searchParams.set('fixedCosts', fixedCosts.value)
+  }
+  history.replaceState(null, '', url.toString())
+})
+
+const addFixedCostsAndVat = (price: number) => {
+  let priceWithFixedCosts = price
+  if (fixedCosts.value !== '' && !isNaN(Number(fixedCosts.value))) {
+    priceWithFixedCosts += Number(fixedCosts.value)
+  }
+  if (addVat.value) {
+    priceWithFixedCosts *= 1.2
+  }
+  return priceWithFixedCosts
+}
 
 /////
 // reload data after one hour

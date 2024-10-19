@@ -11,5 +11,11 @@
   "priceComponents": {
     "labelPrice": "Strompreis",
     "salesTax": "Umsatzsteuer"
+  },
+  "pages": {
+    "table": {
+      "addVat": "Umsatzsteuer hinzufügen (20 %)",
+      "fixedCosts": "Fixkosten"
+    }
   }
 }

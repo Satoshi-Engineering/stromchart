@@ -11,5 +11,11 @@
   "priceComponents": {
     "labelPrice": "Electricity price",
     "salesTax": "Sales tax"
+  },
+  "pages": {
+    "table": {
+      "addVat": "Add VAT (20 %)",
+      "fixedCosts": "Fixed costs"
+    }
   }
 }
