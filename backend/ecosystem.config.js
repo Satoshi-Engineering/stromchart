@@ -2,7 +2,7 @@ module.exports = {
   // PM2 Run Configuration
   apps: [
     {
-      name: 'backend-main',
+      name: 'stromchart-backend',
       script: './build/backend/index.js',
       env: {
         NODE_ENV: 'production',
