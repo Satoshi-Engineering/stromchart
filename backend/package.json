@@ -1,7 +1,8 @@
 {
   "name": "backend",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "scripts": {
+    "audit": "better-npm-audit audit",
     "dev": "nodemon index.ts",
     "build": "rm -rf ./build/* && tsc",
     "typecheck": "tsc --noEmit",
@@ -12,6 +13,7 @@
   },
   "dependencies": {
     "axios": "^1.6.2",
+    "better-npm-audit": "^3.11.0",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.2",

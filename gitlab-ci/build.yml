@@ -1,41 +1,62 @@
-build-backend:
-  stage: build
-  rules:
-    - !reference [.shared_config, rules, web_and_push]
-    - changes:
-      - backend/**/*
-      - package-lock.json
-  cache:
-    - !reference [.shared_config, cache, node_modules_root]
-    - !reference [.shared_config, cache, node_modules_backend]
-    - !reference [.shared_config, cache, env_backend]
-  artifacts:
-    name: "backend-$CI_COMMIT_REF_SLUG"
-    paths:
-      - backend/build
-      - backend/node_modules
-      - backend/.env
-      - backend/ecosystem.config.js
-      - node_modules
-  script:
-    - cd backend
-    - npm run build
+# use docker image and service according to: https://docs.gitlab.com/ci/docker/using_docker_build/#use-docker-in-docker
 
-build-frontend:
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+
+build_backend:
   stage: build
   rules:
-    - !reference [.shared_config, rules, web_and_push]
-    - changes:
-      - frontend/**/*
-      - package-lock.json
-  cache:
-    - !reference [.shared_config, cache, node_modules_root]
-    - !reference [.shared_config, cache, node_modules_frontend]
-    - !reference [.shared_config, cache, env_frontend]
-  artifacts:
-    name: "frontend-$CI_COMMIT_REF_SLUG"
-    paths: 
-      - frontend/dist
+    - !reference [.shared_config, rules, on_development_build]
+    - !reference [.shared_config, rules, on_production_build]
+  tags:
+    - docker
+  image: docker:27.5.1
+  services:
+    - docker:27.5.1-dind
+  before_script:
+    - docker info
   script:
-    - cd frontend
-    - npm run build
+    - apk add jq git
+    - |
+      VERSION=$(jq -r '.version' package.json)
+      SHORT_HASH=$(git rev-parse --short HEAD)
+      if [ -z "$CI_COMMIT_TAG" ]; then
+        VERSION="${VERSION}.${SHORT_HASH}"
+        jq '.meta["version-detailed"] = "${VERSION}"' package.json > package.tmp.json && mv package.tmp.json package.json
+      fi
+    - docker build --build-arg VERSION=$VERSION -f backend.Dockerfile -t stromchart-backend:$VERSION .
+    - echo Logging in to $DOCKER_REGISTRY_HOST
+    - echo $DOCKER_REGISTRY_PASSWORD | docker login --username $DOCKER_REGISTRY_USER --password-stdin $DOCKER_REGISTRY_HOST
+    - docker tag stromchart-backend:$VERSION $DOCKER_REGISTRY_HOST/stromchart-backend:$VERSION
+    - docker push $DOCKER_REGISTRY_HOST/stromchart-backend:$VERSION
+    - docker tag stromchart-backend:$VERSION $DOCKER_REGISTRY_HOST/stromchart-backend:latest
+    - docker push $DOCKER_REGISTRY_HOST/stromchart-backend:latest
+
+build_frontend:
+  stage: build
+  rules:
+    - !reference [.shared_config, rules, on_development_build]
+    - !reference [.shared_config, rules, on_production_build]
+  tags:
+    - docker
+  image: docker:27.5.1
+  services:
+    - docker:27.5.1-dind
+  before_script:
+    - docker info
+  script:
+    - apk add jq git
+    - |
+      VERSION=$(jq -r '.version' package.json)
+      SHORT_HASH=$(git rev-parse --short HEAD)
+      if [ -z "$CI_COMMIT_TAG" ]; then
+        VERSION="${VERSION}.${SHORT_HASH}"
+        jq '.meta["version-detailed"] = "${VERSION}"' package.json > package.tmp.json && mv package.tmp.json package.json
+      fi
+    - docker build --build-arg VERSION=$VERSION -f frontend.Dockerfile -t stromchart-frontend:$VERSION .
+    - echo Logging in to $DOCKER_REGISTRY_HOST
+    - echo $DOCKER_REGISTRY_PASSWORD | docker login --username $DOCKER_REGISTRY_USER --password-stdin $DOCKER_REGISTRY_HOST
+    - docker tag stromchart-frontend:$VERSION $DOCKER_REGISTRY_HOST/stromchart-frontend:$VERSION
+    - docker push $DOCKER_REGISTRY_HOST/stromchart-frontend:$VERSION
+    - docker tag stromchart-frontend:$VERSION $DOCKER_REGISTRY_HOST/stromchart-frontend:latest
+    - docker push $DOCKER_REGISTRY_HOST/stromchart-frontend:latest

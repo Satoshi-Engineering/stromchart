@@ -1,0 +1,12 @@
+{
+  "1102341": {
+    "active": true,
+    "notes": "Moderate vulnerability in esbuild tools used by vite. Only affects development builds.",
+    "expiry":  1740999600000
+  },
+  "1098721": {
+    "active": true,
+    "notes": "Moderate vulnerability in vue-template-compiler.",
+    "expiry":  1740999600000
+  }
+}

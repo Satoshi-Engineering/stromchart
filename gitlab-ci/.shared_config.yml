@@ -1,17 +1,19 @@
 .shared_config:
   rules:
-    web_and_push:
-      if: $CI_PIPELINE_SOURCE != 'push' && $CI_PIPELINE_SOURCE != 'web'
-      when: never
-    web_and_push_and_schedule:
-      if: $CI_PIPELINE_SOURCE != 'push' && $CI_PIPELINE_SOURCE != 'web' && $CI_PIPELINE_SOURCE != 'schedule'
-      when: never
-    deployable_branches:
-      if: $CI_COMMIT_BRANCH != 'main' && $CI_COMMIT_BRANCH != 'develop'
-      when: never
-    nightly_integration:
-      - if: $CI_PIPELINE_SOURCE == 'schedule' && $SCHEDULE_JOB != 'NIGHTLY_INTEGRATION'
-        when: never
+    on_development_build:
+      - if: $CI_COMMIT_BRANCH == 'develop' && ($CI_PIPELINE_SOURCE == 'push' || $CI_PIPELINE_SOURCE == 'web')
+        when: on_success
+    on_development_deploy:
+      - if: $CI_COMMIT_BRANCH == 'develop' && ($CI_PIPELINE_SOURCE == 'push' || $CI_PIPELINE_SOURCE == 'web')
+        when: on_success
+
+    on_production_build:
+      - if: $CI_COMMIT_TAG =~ /v[0-9]+\.[0-9]+\.[0-9]+/ && ($CI_PIPELINE_SOURCE == 'push' || $CI_PIPELINE_SOURCE == 'web')
+        when: on_success
+    on_production_deploy:
+      - if: $CI_COMMIT_TAG =~ /v[0-9]+\.[0-9]+\.[0-9]+/ && ($CI_PIPELINE_SOURCE == 'push' || $CI_PIPELINE_SOURCE == 'web')
+        when: on_success
+
   cache:
     npm:
       key: npm-cache
@@ -19,37 +21,15 @@
         - .npm/
       when: on_success
       policy: pull-push
-    node_modules_root:
-      key:
-        files:
-          - package-lock.json
-        prefix: node_modules_root
-      paths:
-        - node_modules/
-      policy: pull
-    node_modules_backend:
+    node_modules:
       key:
         files:
           - backend/package-lock.json
-        prefix: node_modules_backend
-      paths:
-        - backend/node_modules/
-      policy: pull
-    node_modules_frontend:
-      key:
-        files:
           - frontend/package-lock.json
-        prefix: node_modules_frontend
+          - package-lock.json
+        prefix: node_modules
       paths:
-        - frontend/node_modules/
-      policy: pull
-    env_backend:
-      key: backend-env-$CI_COMMIT_REF_SLUG
-      paths:
-        - backend/.env
-      policy: pull
-    env_frontend:
-      key: frontend-env-$CI_COMMIT_REF_SLUG
-      paths:
-        - frontend/.env.production.local
+        - backend/package-lock.json
+        - frontend/package-lock.json
+        - package-lock.json
       policy: pull
