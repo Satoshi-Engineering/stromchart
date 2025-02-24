@@ -24,8 +24,6 @@
     node_modules:
       key:
         files:
-          - backend/package-lock.json
-          - frontend/package-lock.json
           - package-lock.json
         prefix: node_modules
       paths:
