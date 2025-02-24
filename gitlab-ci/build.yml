@@ -10,6 +10,7 @@ build_backend:
     - !reference [.shared_config, rules, on_production_build]
   tags:
     - docker
+    - x86
   image: docker:27.5.1
   services:
     - docker:27.5.1-dind
@@ -39,6 +40,7 @@ build_frontend:
     - !reference [.shared_config, rules, on_production_build]
   tags:
     - docker
+    - x86
   image: docker:27.5.1
   services:
     - docker:27.5.1-dind
