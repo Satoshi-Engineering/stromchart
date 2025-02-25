@@ -21,3 +21,4 @@ RUN cd frontend && npm ci --production=false && npm run build
 # This is the final image that will be used to run the application
 FROM nginx
 COPY --from=build /app/frontend/dist/ /usr/share/nginx/html/
+COPY --link frontend.nginx.conf /etc/nginx/conf.d/default.conf
