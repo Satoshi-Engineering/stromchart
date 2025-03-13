@@ -1,7 +1,7 @@
 [{
   "id": "infrastructureFee",
   "label": "Infrastrukturbeitrag",
-  "color": "#B9D8C2",
+  "color": "#9BE2B0",
   "values": [{
     "validUntil": null,
     "amount": 4
@@ -50,7 +50,7 @@
 }, {
   "id": "gridLoss",
   "label": "Netzverlustentgelt",
-  "color": "#4A5043",
+  "color": "#9AC2C9",
   "values": [{
     "validUntil": 1677625200,
     "amount": 2.328
@@ -67,7 +67,7 @@
 }, {
   "id": "renewableFee",
   "label": "Erneuerbare Förderbeitrag",
-  "color": "#33FFB6",
+  "color": "#CAA0D0",
   "values": [{
     "validUntil": 1735686000,
     "amount": 0.0
@@ -78,7 +78,7 @@
 }, {
   "id": "electricityFee",
   "label": "Elektrizitätsabgabe",
-  "color": "#9AC2C9",
+  "color": "#D0A0A0",
   "values": [{
     "validUntil": 1735686000,
     "amount": 0.1
