@@ -7,17 +7,6 @@
     "amount": 4
   }]
 }, {
-  "id": "electricityFee",
-  "label": "Elektrizitätsabgabe",
-  "color": "#9AC2C9",
-  "values": [{
-    "validUntil": 1735686000,
-    "amount": 0.1
-  }, {
-    "validUntil": null,
-    "amount": 1.5
-  }]
-}, {
   "id": "gridFee",
   "label": "Netznutzungsentgelt",
   "color": "#8AA1B1",
@@ -74,5 +63,27 @@
   }, {
     "validUntil": null,
     "amount": 0.444
+  }]
+}, {
+  "id": "renewableFee",
+  "label": "Erneuerbare Förderbeitrag",
+  "color": "#33FFB6",
+  "values": [{
+    "validUntil": 1735686000,
+    "amount": 0.0
+  }, {
+    "validUntil": null,
+    "amount": 0.796
+  }]
+}, {
+  "id": "electricityFee",
+  "label": "Elektrizitätsabgabe",
+  "color": "#9AC2C9",
+  "values": [{
+    "validUntil": 1735686000,
+    "amount": 0.1
+  }, {
+    "validUntil": null,
+    "amount": 1.5
   }]
 }]
