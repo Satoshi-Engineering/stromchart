@@ -1,7 +1,1 @@
-{
-  "1101844": {
-    "active": true,
-    "notes": "High vulnerability in path-to-regexp. We currently have no resources to implement a workaround, so we have to wait for a fix.",
-    "expiry":  1740999600000
-  }
-}
+{}

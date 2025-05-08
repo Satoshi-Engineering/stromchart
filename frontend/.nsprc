@@ -8,20 +8,5 @@
     "active": true,
     "notes": "Moderate vulnerability in vue-template-compiler.",
     "expiry":  1748772000000
-  },
-  "1103026": {
-    "active": true,
-    "notes": "Moderate vulnerability in @babel/helpers.",
-    "expiry":  1748772000000
-  },
-  "1102472": {
-    "active": true,
-    "notes": "High vulnerability in axios.",
-    "expiry":  1748772000000
-  },
-  "1102468": {
-    "active": true,
-    "notes": "High vulnerability in vue-i18n.",
-    "expiry":  1748772000000
   }
 }
