@@ -3,7 +3,7 @@ import { Router } from 'express'
 import { ErrorCode } from '../../../src/data/Errors'
 import type { SuccessResponse, ErrorResponse } from '../../../src/data/Response'
 
-import { getForDateIso } from '../services/awattarPrices'
+import { loadAwattarPrices } from '../services/loadAwattarPrices'
 
 const router = Router()
 
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
     return
   }
   try {
-    const data = await getForDateIso(req.query.dateIso)
+    const data = await loadAwattarPrices(req.query.dateIso)
     const response: SuccessResponse = {
       status: 'success',
       data,
